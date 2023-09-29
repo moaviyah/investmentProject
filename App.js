@@ -18,6 +18,25 @@ import Deposit from './Screens/Deposit';
 import Withdraw from './Screens/Withdraw';
 import CurrentPlan from './Screens/CurrentPlan';
 import { primary } from './color';
+import Refferals from './Screens/Referrals';
+import Admin from './Screens/Admin';
+import ManageRequests from './Screens/ManageRequests';
+import ManageUsers from './Screens/ManageUsers';
+import ManageInvestments from './Screens/ManageInvestments';
+import DocumentVerification from './Screens/DocumentVerification';
+import LearningAdmin from './Screens/LearningAdmin';
+import UserDetails from './Screens/UserDetails';
+import Verification from './Screens/Verification';
+import EmailVerification from './Screens/EmailVerification';
+import AdminDocumentVerification from './Screens/AdminDocumentVerification';
+import Blocked from './Screens/Blocked';
+import ManageWalletAddresses from './Screens/ManageWalletAddresses';
+import ManageUserAgreement from './Screens/ManageUserAgreement';
+import ManagePrivacyPolicy from './Screens/ManagePrivacyPolicy';
+import ManageAboutUs from './Screens/ManageAboutUs';
+import AboutUs from './Screens/AboutUs';
+import Privacy from './Screens/Privacy';
+import UserAgreement from './Screens/UserAgreement';
 
 export default function App() {
   const [signedIn, setSignedIn] = useState(false);
@@ -64,6 +83,25 @@ export default function App() {
                 <Stack.Screen name='Deposit' component={Deposit} />
                 <Stack.Screen name='Withdraw' component={Withdraw} />
                 <Stack.Screen name='CurrentPlan' component={CurrentPlan} />
+                <Stack.Screen name='Refferals' component={Refferals} />
+                <Stack.Screen name='Admin' component={Admin} />
+                <Stack.Screen name='ManageRequests' component={ManageRequests} />
+                <Stack.Screen name='ManageUsers' component={ManageUsers} />
+                <Stack.Screen name='ManageInvestments' component={ManageInvestments} />
+                <Stack.Screen name='DocumentVerification' component={DocumentVerification} />
+                <Stack.Screen name='LearningAdmin' component={LearningAdmin} />
+                <Stack.Screen name='UserDetails' component={UserDetails} />
+                <Stack.Screen name='Verification' component={Verification}/>
+                <Stack.Screen name='EmailVerification' component={EmailVerification}/>
+                <Stack.Screen name='AdminDocumentVerification' component={AdminDocumentVerification}/>
+                <Stack.Screen name='Blocked' component={Blocked}/>
+                <Stack.Screen name='ManageWalletAddresses' component={ManageWalletAddresses}/>
+                <Stack.Screen name='ManageUserAgreement' component={ManageUserAgreement}/>
+                <Stack.Screen name='ManagePrivacyPolicy' component={ManagePrivacyPolicy}/>
+                <Stack.Screen name='ManageAboutUs' component={ManageAboutUs}/>
+                <Stack.Screen name='AboutUs' component={AboutUs}/>
+                <Stack.Screen name='Privacy' component={Privacy}/>
+                <Stack.Screen name='UserAgreement' component={UserAgreement}/>
               </Stack.Navigator>
             </NavigationContainer>
           )

@@ -10,8 +10,8 @@ import {
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { background, primary } from '../color';
-import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
-
+import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
+import { getDatabase, ref, onValue, off , update } from "firebase/database";
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
@@ -26,9 +26,20 @@ export default function Login({navigation}) {
     const handleLogin = () => {
         signInWithEmailAndPassword(auth, email, password)
           .then((userCredential) => {
-            setEmail('')
-            setPassword('')
-            navigation.navigate('Dashboard')
+                const db = getDatabase();
+                const displayName = auth.currentUser?.displayName;
+                const userRef = ref(db, `users/${displayName}`);
+                onValue(userRef, (snapshot) => {
+                  const data = snapshot.val();
+                  const blocked = data?.isBlocked;
+                  if (blocked === true) {
+                    navigation.navigate('Blocked');
+                  } else {
+                    setEmail('')
+                    setPassword('')
+                    navigation.navigate('Dashboard')
+                  }
+                });
           })
           .catch((error) => {
             console.log('Error logging in:', error);
@@ -37,24 +48,37 @@ export default function Login({navigation}) {
           });
       };
 
+    const handleForgotPassword = () => {
+        sendPasswordResetEmail(auth, email)
+            .then(() => {
+                setError('Password reset email sent. Check your inbox.');
+            })
+            .catch((error) => {
+                setError('Error sending password reset email.');
+            });
+    };  
+
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.top}>
                 <Ionicons name='chevron-back-sharp' style={styles.icon} size={26} onPress={()=>{navigation.goBack();}}/>
                 <Text style={styles.main_heading}>Login with an account</Text>
-                <Text style={styles.second_heading}>Invest and double your income now</Text>
+                <Text style={styles.second_heading}>Invest with us & earn profit regularly</Text>
             </View>
             <View style={styles.main}>
                 <TextInput placeholder='Email address' placeholderTextColor={'#828282'} style={styles.input} onChangeText={(text)=>{setEmail(text)}} value={email}/>
                 <TextInput placeholder='Password'placeholderTextColor={'#828282'}  style={styles.input} secureTextEntry onChangeText={(text)=>{setPassword(text)}} value={password}/>
 
                 {error ? <Text style={{ color: 'red', alignSelf:'center' }}>{error}</Text> : null}
-
+                <Text style={{alignSelf:'flex-end', marginRight:30, color:'darkblue'}} onPress={handleForgotPassword}>
+                Forgot Password?
+            </Text>
                 <TouchableOpacity style={styles.btn} onPress={handleLogin}>
                     <Text style={styles.btn_txt}>
                         Login
                     </Text>
                 </TouchableOpacity>
+                
                 <Text style={styles.login_txt} onPress={()=>{navigation.navigate('SignUp')}}>
                     Do not have an account?
                 </Text>
@@ -73,7 +97,8 @@ const styles = StyleSheet.create({
 
     },
     icon: {
-        margin: windowHeight * 0.02
+        marginTop: 30,
+        marginHorizontal:10
     },
     main_heading: {
         fontSize: 28,

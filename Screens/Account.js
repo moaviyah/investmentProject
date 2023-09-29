@@ -21,7 +21,6 @@ const Account = ({ navigation }) => {
 
   const name = auth.currentUser?.displayName;
   const email = auth.currentUser?.email
-
   const [balance, setBalance] = useState()
   const handleSignOut = () => {
     signOut(auth)
@@ -36,23 +35,26 @@ const Account = ({ navigation }) => {
 
   useEffect(() => {
     const db = getDatabase();
-    const userId = auth.currentUser?.uid;
+    const userId = auth.currentUser?.displayName;
     const userRef = ref(db, `users/${userId}`);
-
-    onValue(userRef, (snapshot) => {
+    const Unsubscribe = () => onValue(userRef, (snapshot) => {
       const data = snapshot.val();
+      const balance = data.balance
       console.log(data.balance);
-      setBalance(data.balance);
+      setBalance(balance);
     });
 
     return () => {
-      off(userRef);
+      Unsubscribe
     };
   }, []);
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView >
-        <Text style={styles.head}>Profile</Text>
+        <View style={{ flexDirection: 'row', marginTop: 35, justifyContent: 'space-between', alignItems: 'center', marginHorizontal: 20 }}>
+          <Text style={styles.head}>Profile</Text>
+          <Image source={require('../assets/TrustNOVALogo.png')} style={{ height: 60, width: 80 }} />
+        </View>
         <TouchableOpacity style={styles.profile_button}>
           <AntDesign name='profile' size={28} color='#FF9500' />
           <View style={styles.mid_btn_container}>
@@ -62,37 +64,56 @@ const Account = ({ navigation }) => {
         </TouchableOpacity>
 
         <Text style={styles.account_head}>Account</Text>
-        <TouchableOpacity style={styles.account_btn} onPress={() => navigation.navigate('Withdraw', { balance })}>
-          <Fontisto name='wallet' size={28} color='#FF3B30' />
-          <Text style={styles.btn_head}>Withdraw</Text>
-          <Ionicons name='chevron-forward-outline' size={24} style={styles.forward_icon}></Ionicons>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.account_btn} onPress={() => navigation.navigate('Deposit')}>
-          <MaterialCommunityIcons name='wallet-plus' size={28} color='#AF52DE' />
-          <Text style={styles.btn_head}>Deposit</Text>
-          <Ionicons name='chevron-forward-outline' size={24} style={styles.forward_icon}></Ionicons>
-        </TouchableOpacity>
-
-
 
         <TouchableOpacity style={styles.account_btn} onPress={() => navigation.navigate('CurrentPlan')}>
-          <MaterialIcons name='event-available' size={28} color='#34C759' />
-          <Text style={styles.btn_head}>Current Plan</Text>
+          <Image source={require('../assets/return-of-investment.png')} style={{ height: 28, width: 28 }} />
+          <Text style={styles.btn_head}>My Investments</Text>
           <Ionicons name='chevron-forward-outline' size={24} style={styles.forward_icon}></Ionicons>
         </TouchableOpacity>
 
-
-        <TouchableOpacity style={styles.account_btn}>
-          <MaterialIcons name='people' size={28} color='#007AFF' />
-          <Text style={styles.btn_head}>Refer</Text>
+        <TouchableOpacity style={styles.account_btn} onPress={() => navigation.navigate('Verification')}>
+          <Image source={require('../assets/verification.png')} style={{ height: 28, width: 28 }} />
+          <Text style={styles.btn_head}>Account Verification</Text>
           <Ionicons name='chevron-forward-outline' size={24} style={styles.forward_icon}></Ionicons>
         </TouchableOpacity>
+
+        <TouchableOpacity style={styles.account_btn} onPress={() => navigation.navigate('CurrentPlan')}>
+          <Image source={require('../assets/technical-support.png')} style={{ height: 28, width: 28 }} />
+          <Text style={styles.btn_head}>Support</Text>
+          <Ionicons name='chevron-forward-outline' size={24} style={styles.forward_icon}></Ionicons>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.account_btn} onPress={() => navigation.navigate('AboutUs')}>
+          <Image source={require('../assets/info.png')} style={{ height: 28, width: 28 }} />
+          <Text style={styles.btn_head}>About Us</Text>
+          <Ionicons name='chevron-forward-outline' size={24} style={styles.forward_icon}></Ionicons>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.account_btn} onPress={() => navigation.navigate('Privacy')}>
+          <Image source={require('../assets/insurance.png')} style={{ height: 28, width: 28 }} />
+          <Text style={styles.btn_head}>Privacy Policy</Text>
+          <Ionicons name='chevron-forward-outline' size={24} style={styles.forward_icon}></Ionicons>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.account_btn} onPress={() => navigation.navigate('UserAgreement')}>
+          <Image source={require('../assets/agreement.png')} style={{ height: 28, width: 28 }} />
+          <Text style={styles.btn_head}>User Agreement</Text>
+          <Ionicons name='chevron-forward-outline' size={24} style={styles.forward_icon}></Ionicons>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.account_btn} onPress={() => navigation.navigate('Admin')}>
+          <Image source={require('../assets/agreement.png')} style={{ height: 28, width: 28 }} />
+          <Text style={styles.btn_head}>Admin</Text>
+          <Ionicons name='chevron-forward-outline' size={24} style={styles.forward_icon}></Ionicons>
+        </TouchableOpacity>
+
 
         <TouchableOpacity onPress={handleSignOut} style={[styles.account_btn, { width: windowWidth * 0.6, alignSelf: 'center', alignItems: 'center', justifyContent: 'center' }]}>
           <MaterialCommunityIcons name='logout' size={28} color={'red'} />
           <Text style={[styles.btn_head, { color: 'red', marginLeft: windowWidth * 0.03 }]}>Log out</Text>
         </TouchableOpacity>
+
+
 
       </ScrollView>
     </SafeAreaView>
@@ -106,8 +127,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   head: {
-    marginTop: windowHeight * 0.05,
-    marginLeft: windowWidth * 0.05,
     fontSize: 26,
     fontWeight: '800'
   },
@@ -137,9 +156,6 @@ const styles = StyleSheet.create({
   },
   name: {
     fontWeight: 'bold'
-  },
-  email: {
-
   },
   mid_btn_container: {
     padding: windowHeight * 0.01

@@ -1,0 +1,10 @@
+{
+  "addresses": {
+    "bnb": {
+      "wallet": "test"
+    },
+    "trc": {
+      "wallet": "test"
+    }
+  }
+}

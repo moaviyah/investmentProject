@@ -1,44 +1,53 @@
-import React, { useState, useEffect} from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, Dimensions, Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Image,
+  StyleSheet,
+  Dimensions,
+  Alert,
+  Clipboard,
+} from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import { useNavigation } from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { getDatabase, ref, set, serverTimestamp, push } from "firebase/database";
+import { getDatabase, ref, set, push, onValue } from 'firebase/database';
 import auth from '../config';
-import {useClipboard} from '@react-native-community/clipboard';
-
+import { useClipboard } from '@react-native-community/clipboard';
+import { Picker } from '@react-native-picker/picker';
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
 const Deposit = ({ navigation }) => {
   const userId = auth.currentUser?.uid;
-  const [amount, setAmount] = useState('');
-  const [address, setAddress] = useState('0x6fBEb69011a02216a3Ed618C26fD5B71fC401193')
+  const [amount, setAmount] = useState('Enter amount');
   const [isCopied, setIsCopied] = useState(false);
-  const [time, setTime] =useState()
-  const [data, setString] = useState();
-  useEffect(() => {
+  const [trxId, setTrxId] = useState('');
+  const [selectedChain, setSelectedChain] = useState('bnb'); // Default selected chain
+  const [walletAddresses, setWalletAddresses] = useState({});
+  const [address, setAddress] = useState('');
 
-    var hours = new Date().getHours(); //Current Hours
-    var min = new Date().getMinutes(); //Current Minutes
-    var sec = new Date().getSeconds(); //Current Seconds
-    setTime(
-      hours + ':' + min
-    );
-  }, []);
+  useEffect(() => {
+    const db = getDatabase();
+    const walletRef = ref(db, 'addresses');
+    onValue(walletRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const addressesData = snapshot.val();
+        setWalletAddresses(addressesData);
+        setAddress(addressesData[selectedChain]?.wallet || '');
+      }
+    });
+  }, [selectedChain]);
 
   const copyToClipboard = () => {
-    // Clipboard.setStringAsync('0x6fBEb69011a02216a3Ed618C26fD5B71fC401193');
-    setString(address);
-    console.log('success')
+    Clipboard.setString(address);
     setIsCopied(true);
     setTimeout(() => {
       setIsCopied(false);
     }, 4000);
   };
-
-
 
   const handleAmountChange = (value) => {
     setAmount(value);
@@ -49,41 +58,60 @@ const Deposit = ({ navigation }) => {
   };
 
   function post_request() {
-    const db = getDatabase();
+    if (amount === '' || trxId === '') {
+      return Alert.alert('Please Enter Amount and TrxId of the transfer to proceed.');
+    }
 
-    const request = ref(db, "requests");
+    console.log(auth.currentUser.displayName);
+    const db = getDatabase();
+    const request = ref(db, 'requests');
     const newRequestRef = push(request);
     const reqId = newRequestRef.key;
     console.log(reqId);
-
     set(newRequestRef, {
       amount: amount,
-      status: 'pending',
+      status: 'Pending',
       id: userId,
       request: 'Deposit',
-      timestamp:time,
-      requestId: reqId
-  });
+      timestamp: Date.now(),
+      requestId: reqId,
+      username: auth.currentUser.displayName,
+      trxId: trxId,
+      chain:selectedChain
+    });
 
-    Alert.alert('Request posted. Please wait for response')
+    Alert.alert('Request posted. Please wait for response');
     console.log('success');
     navigation.goBack();
   }
 
   return (
     <View style={styles.modal}>
-
-      <AntDesign name='close' style={{ alignSelf: 'flex-end' }} size={22} onPress={()=>navigation.goBack()} />
+      <View style={{ flexDirection: 'row', marginTop: 20, marginBottom: 20, justifyContent: 'space-between', alignItems: 'center' }}>
+        <AntDesign name='left' size={24} onPress={() => navigation.goBack()} />
+        <Image source={require('../assets/TrustNOVALogo.png')} style={{ height: 60, width: 80 }} />
+      </View>
 
       <Text style={styles.modal_txt}>Send your funds from your wallet</Text>
       <Text style={styles.subHead}>You must transfer from your centralized exchange account</Text>
 
       <Text style={styles.detail_txt}>Transfer Details</Text>
-
+      <View style={styles.add_container}>
+        <Text style={styles.add_txt}>Chain</Text>
+        <Picker
+          selectedValue={selectedChain}
+          style={styles.picker}
+          onValueChange={(itemValue) => setSelectedChain(itemValue)}
+        >
+          {Object.keys(walletAddresses).map((chain, index) => (
+            <Picker.Item key={index} label={chain.toUpperCase()} value={chain} />
+          ))}
+        </Picker>
+      </View>
       <View style={styles.add}>
         <View style={styles.icon_container}>
           <Text style={styles.add_txt}> Wallet Address</Text>
-          <MaterialCommunityIcons name={isCopied ? 'check' : 'content-copy'} size={20} onPress={copyToClipboard}/>
+          <MaterialCommunityIcons name={isCopied ? 'check' : 'content-copy'} size={20} onPress={copyToClipboard} />
         </View>
 
         <View style={styles.add_container}>
@@ -94,35 +122,44 @@ const Deposit = ({ navigation }) => {
         </Text>
 
         <View style={styles.add_container}>
-          <TextInput style={styles.amountInput} placeholder="Enter amount" placeholderTextColor="#9B9B9B" onChangeText={handleAmountChange} value={amount} />
+          <TextInput style={styles.amountInput} placeholder={amount} placeholderTextColor="black" onChangeText={handleAmountChange} editable={false} />
         </View>
 
         <View style={styles.setnumber_container}>
-          <TouchableOpacity onPress={() => handleButtonClick(50)} style={styles.num_btn}>
-            <Text>50</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => handleButtonClick(100)} style={styles.num_btn}>
-            <Text>100</Text>
-          </TouchableOpacity>
           <TouchableOpacity onPress={() => handleButtonClick(200)} style={styles.num_btn}>
             <Text>200</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => handleButtonClick(500)} style={styles.num_btn}>
-            <Text>500</Text>
+          <TouchableOpacity onPress={() => handleButtonClick(400)} style={styles.num_btn}>
+            <Text>400</Text>
           </TouchableOpacity>
+          <TouchableOpacity onPress={() => handleButtonClick(600)} style={styles.num_btn}>
+            <Text>600</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => handleButtonClick(800)} style={styles.num_btn}>
+            <Text>800</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => handleButtonClick(1000)} style={styles.num_btn}>
+            <Text>1000</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => handleButtonClick(1500)} style={styles.num_btn}>
+            <Text>1500</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => handleButtonClick(2000)} style={styles.num_btn}>
+            <Text>2000</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.add_container}>
+          <TextInput style={styles.amountInput} placeholder="Trx Id" placeholderTextColor="#9B9B9B" onChangeText={(text) => setTrxId(text)} value={trxId} />
         </View>
 
         <TouchableOpacity style={styles.transfer_btn} onPress={post_request}>
-            <Text style={styles.btn_txt}>
-                I made the transfer
-            </Text>
+          <Text style={styles.btn_txt}>
+            I made the transfer
+          </Text>
         </TouchableOpacity>
       </View>
-
-
-
     </View>
-  )
+  );
 }
 
 export default Deposit;
@@ -150,7 +187,6 @@ const styles = StyleSheet.create({
     height: windowHeight * 0.5,
     padding: windowWidth * 0.05,
     borderRadius: 10
-
   },
   add_txt: {
     fontWeight: '600'
@@ -181,18 +217,25 @@ const styles = StyleSheet.create({
     marginVertical: windowHeight * 0.009,
     borderRadius: 5
   },
-  transfer_btn:{
-    alignSelf:'center',
-    width:windowWidth*0.8,
-    backgroundColor:'#31A062',
-    height:windowHeight* 0.07,
-    borderRadius:10,
-    justifyContent:'center',
-    alignItems:'center',
-    marginTop:windowHeight*0.09
+  transfer_btn: {
+    alignSelf: 'center',
+    width: windowWidth * 0.8,
+    backgroundColor: '#31A062',
+    height: windowHeight * 0.07,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 5
   },
-  btn_txt:{
-    color:'white',
-    fontWeight:'700'
-  }
-})
+  btn_txt: {
+    color: 'white',
+    fontWeight: '700'
+  },
+  picker: {
+    height: 50,
+    width: '100%',
+    marginBottom: 10,
+    borderBottomWidth: 1,
+    borderColor: '#ccc',
+  },
+});

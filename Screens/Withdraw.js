@@ -1,72 +1,75 @@
-import { StyleSheet, Text, View, TouchableOpacity, Dimensions, TextInput, Alert } from 'react-native'
+import { StyleSheet, Text, View, TouchableOpacity, Dimensions, TextInput, Alert, Clipboard, Image } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { getDatabase, ref, set, push } from "firebase/database";
 import auth from '../config';
-import {useClipboard} from '@react-native-community/clipboard';
+import { useClipboard } from '@react-native-community/clipboard';
 
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
-const Withdraw = ({navigation,balance}) => {
+const Withdraw = ({ navigation, route }) => {
+    const { balance } = route.params
+    console.log(balance)
     const [copiedText, setCopiedText] = useState('');
     const [ispasted, setIsPasted] = useState(false);
-    const [amount, setAmount] =useState()
-    const [time, setTime] =useState()
-    const userId=auth.currentUser?.uid;
-    const [data, setString] = useState('nothing');
+    const [amount, setAmount] = useState()
+    const userId = auth.currentUser?.uid;
 
-    useEffect(() => {
-        const currentDate = new Date(); // Create a new Date object
-        var hours = currentDate.getHours(); // Get the current hours
-        var min = currentDate.getMinutes(); //s Get the current minutes
-        setTime(
-          hours + ':' + min 
-        );
-      }, []);
-      
 
-      const fetchCopiedText = async () => {
-        if (data !== null) {
-            const clipboardContent = data; 
+
+    const fetchCopiedText = async () => {
+        try {
+            const clipboardContent = await Clipboard.getString();
             setCopiedText(clipboardContent);
             setIsPasted(true);
-            console.log(copiedText)
+            console.log(copiedText);
             setTimeout(() => {
                 setIsPasted(false);
             }, 4000);
-        } else {
+        } catch (error) {
             console.error('Clipboard functionality is not available or not properly configured.');
         }
     };
 
-    const post_request =()=> {
-    if(amount<=balance){
-        const db = getDatabase();
-        const request = ref(db, "requests");
-        const newRequestRef = push(request);
-        const reqId = newRequestRef.key;
-        set(newRequestRef, {
-            amount: amount,
-            status: 'pending',
-            id: userId,
-            request: 'Withdraw',
-            timestamp:time,
-            requestId: reqId,
-        });
-        console.log('success')
-    }else{
-        Alert.alert('Insufficient Balance')
-        console.log('insufficient amount')
+
+    const post_request = () => {
+        if (amount <= balance) {
+            if(amount < 50){
+                Alert.alert('Minimum amount is $50')
+                return
+            }
+            const db = getDatabase();
+            const request = ref(db, "requests");
+            const newRequestRef = push(request);
+            const reqId = newRequestRef.key;
+            set(newRequestRef, {
+                amount: amount,
+                status: 'Pending',
+                id: userId,
+                request: 'Withdraw',
+                timestamp: Date.now(),
+                requestId: reqId,
+                username: auth.currentUser.displayName
+            });
+            console.log('success')
+            navigation.goBack()
+            Alert.alert('Request Generated Successfully. Please Wait')
+        } else {
+            Alert.alert('Insufficient Balance')
+            console.log('insufficient amount')
+        }
     }
-      }
 
 
     return (
         <View style={styles.modal}>
-            <AntDesign name='close' style={{ alignSelf: 'flex-end' }} size={22} onPress={()=>navigation.goBack()} />
+            <View style={{ flexDirection: 'row', marginTop: 35, marginBottom: 20, justifyContent: 'space-between', alignItems: 'center' }}>
+                <AntDesign name='left' size={24} onPress={() => navigation.goBack()} />
+                <Image source={require('../assets/TrustNOVALogo.png')} style={{ height: 60, width: 80 }} />
+            </View>
             <Text style={styles.modal_txt}>Receive your earnings in your wallet</Text>
             <Text style={styles.subHead}>Amount will be deducted when withdraw request is completed</Text>
             <View style={styles.link_container}>
@@ -85,16 +88,16 @@ const Withdraw = ({navigation,balance}) => {
                 <View style={styles.inputContainer}>
                     <TextInput
                         style={styles.input}
-                        onChangeText={(text)=>{setAmount(text)}}
+                        onChangeText={(text) => { setAmount(text) }}
                     />
                 </View>
             </View>
 
-        <TouchableOpacity style={styles.transfer_btn} onPress={post_request}>
-            <Text style={styles.btn_txt}>
-                Initialize Withdraw
-            </Text>
-        </TouchableOpacity>
+            <TouchableOpacity style={styles.transfer_btn} onPress={post_request}>
+                <Text style={styles.btn_txt}>
+                    Initialize Withdraw
+                </Text>
+            </TouchableOpacity>
         </View>
     )
 }
@@ -104,7 +107,8 @@ export default Withdraw
 const styles = StyleSheet.create({
     modal: {
         flex: 1,
-        padding: windowHeight * 0.01
+        paddingVertical: 10,
+        paddingHorizontal: 15
     },
     link_container: {
         height: windowHeight * 0.1,
@@ -131,22 +135,22 @@ const styles = StyleSheet.create({
         marginVertical: windowHeight * 0.03,
         fontSize: 16,
         color: 'grey',
-      },
-      input_container_txt:{
-        color:'grey'
-      },
-      transfer_btn:{
-        alignSelf:'center',
-        width:windowWidth*0.8,
-        backgroundColor:'#31A062',
-        height:windowHeight* 0.07,
-        borderRadius:10,
-        justifyContent:'center',
-        alignItems:'center',
-        marginTop:windowHeight*0.09
-      },
-      btn_txt:{
-        color:'white',
-        fontWeight:'700'
-      }
+    },
+    input_container_txt: {
+        color: 'grey'
+    },
+    transfer_btn: {
+        alignSelf: 'center',
+        width: windowWidth * 0.8,
+        backgroundColor: '#31A062',
+        height: windowHeight * 0.07,
+        borderRadius: 10,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: windowHeight * 0.09
+    },
+    btn_txt: {
+        color: 'white',
+        fontWeight: '700'
+    }
 })
