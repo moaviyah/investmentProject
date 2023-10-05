@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, TextInput } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, TextInput, ScrollView } from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { getDatabase, ref, onValue, update } from 'firebase/database';
+import { primary } from '../color';
 
 const UserDetails = ({ navigation, route }) => {
-  const { user } = route.params;
+  const { user, history } = route.params;
   const db = getDatabase();
-
   const [isAgent, setIsAgent] = useState(user.isAgent);
   const [isBlocked, setIsBlocked] = useState(user.isBlocked);
   const [editedPlan, setEditedPlan] = useState(user.plan.toString()); // Initialize editedPlan state
@@ -45,52 +45,26 @@ const UserDetails = ({ navigation, route }) => {
       });
   };
 
-  // Function to update user's plan
-  const updatePlan = () => {
+  const resetPin =()=>{
     const userRef = ref(db, `users/${user.username}`);
-
-    // Parse the editedPlan to a number (assuming it should be a numeric value)
-    const newPlan = parseFloat(editedPlan);
-
-    if (!isNaN(newPlan)) {
-      update(userRef, { plan: newPlan })
-        .then(() => {
-          console.log(`User's plan has been updated to: ${newPlan}`);
-        })
-        .catch((error) => {
-          console.error('Error updating user plan:', error);
-          // Handle the error
-        });
-    } else {
-      console.error('Invalid plan value');
-      // Handle the error (e.g., display a message to the admin)
-    }
-  };
-
-  // Function to update user's balance
-  const updateBalance = () => {
-    const userRef = ref(db, `users/${user.username}`);
-
-    // Parse the editedBalance to a number (assuming it should be a numeric value)
-    const newBalance = parseFloat(editedBalance);
-
-    if (!isNaN(newBalance)) {
-      update(userRef, { balance: newBalance })
-        .then(() => {
-          console.log(`User's balance has been updated to: ${newBalance}`);
-        })
-        .catch((error) => {
-          console.error('Error updating user balance:', error);
-          // Handle the error
-        });
-    } else {
-      console.error('Invalid balance value');
-      // Handle the error (e.g., display a message to the admin)
-    }
-  };
+    const updatedUserData = {
+      withdrawalPIN: null, // Set to null to remove the field
+      withdrawalAddress: null, // Set to null to remove the field
+    };
+  
+    // Update the user's data in Firebase to remove the specified fields
+    update(userRef, updatedUserData)
+      .then(() => {
+        console.log('User PIN and Address reset successfully');
+      })
+      .catch((error) => {
+        console.error('Error resetting user PIN and Address:', error);
+        // Handle the error
+      });
+  }
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <AntDesign
         name="left"
         style={styles.backButton}
@@ -113,7 +87,7 @@ const UserDetails = ({ navigation, route }) => {
         <Text style={styles.userDetail}>Referred By: {user.referredBy}</Text>
       </View>
 
-      <View style={styles.inputContainer}>
+      {/* <View style={styles.inputContainer}>
         <TextInput
           style={styles.inputField}
           placeholder="Edit Plan"
@@ -123,19 +97,7 @@ const UserDetails = ({ navigation, route }) => {
         <TouchableOpacity style={styles.editButton} onPress={updatePlan}>
           <Text style={styles.editButtonText}>Edit Plan</Text>
         </TouchableOpacity>
-      </View>
-
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.inputField}
-          placeholder="Edit Balance"
-          value={editedBalance}
-          onChangeText={(text) => setEditedBalance(text)}
-        />
-        <TouchableOpacity style={styles.editButton} onPress={updateBalance}>
-          <Text style={styles.editButtonText}>Edit Balance</Text>
-        </TouchableOpacity>
-      </View>
+      </View> */}
 
       <View style={styles.buttonsContainer}>
         <TouchableOpacity style={styles.button} onPress={toggleAgentStatus}>
@@ -143,7 +105,11 @@ const UserDetails = ({ navigation, route }) => {
             {isAgent ? 'Remove Agent' : 'Make Agent'}
           </Text>
         </TouchableOpacity>
-
+        <TouchableOpacity style={[styles.button, {backgroundColor:primary}]} onPress={()=>navigation.navigate('UserHistory', { history})}>
+          <Text style={styles.buttonText}>
+            See Distribution History
+          </Text>
+        </TouchableOpacity>
         <TouchableOpacity
           style={[styles.button, { backgroundColor: isBlocked ? 'green' : 'red' }]}
           onPress={toggleBlockedStatus}
@@ -152,8 +118,23 @@ const UserDetails = ({ navigation, route }) => {
             {isBlocked ? 'Unblock User' : 'Block User'}
           </Text>
         </TouchableOpacity>
+        <TouchableOpacity style={[styles.button, {backgroundColor:'#fb8500'}]} onPress={()=>navigation.navigate('TransactionHistory')}>
+          <Text style={styles.buttonText}>
+            See Transactions History
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.button, {backgroundColor:'#2f3e46'}]} onPress={()=>navigation.navigate('AddAmount', {user})}>
+          <Text style={styles.buttonText}>
+            Send Amount
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.button, {backgroundColor:'#9e0059'}]} onPress={resetPin}>
+          <Text style={styles.buttonText}>
+            Reset User Pin & Address
+          </Text>
+        </TouchableOpacity>
       </View>
-    </View>
+    </ScrollView>
   );
 };
 

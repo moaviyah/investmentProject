@@ -37,6 +37,16 @@ import ManageAboutUs from './Screens/ManageAboutUs';
 import AboutUs from './Screens/AboutUs';
 import Privacy from './Screens/Privacy';
 import UserAgreement from './Screens/UserAgreement';
+import ManagePopUp from './Screens/ManagePopUp';
+import ManagePlans from './Screens/ManagePlans';
+import OneTimePercentage from './Screens/OneTimePercentage';
+import UserHistory from './Screens/UserHistory';
+import SetWithdrawal from './Screens/SetWithdrawal';
+import TransactionHistory from './Screens/TransactionHistory';
+import Learning from './Screens/Learning';
+import AddAmount from './Screens/AddAmount';
+import ManageSupportLinks from './Screens/ManageSupportLinks';
+import CompletedContracts from './Screens/CompletedContracts';
 
 export default function App() {
   const [signedIn, setSignedIn] = useState(false);
@@ -102,6 +112,17 @@ export default function App() {
                 <Stack.Screen name='AboutUs' component={AboutUs}/>
                 <Stack.Screen name='Privacy' component={Privacy}/>
                 <Stack.Screen name='UserAgreement' component={UserAgreement}/>
+                <Stack.Screen name='ManagePopUp' component={ManagePopUp}/>
+                <Stack.Screen name='ManagePlans' component={ManagePlans}/>
+                <Stack.Screen name='OneTimePercentage' component={OneTimePercentage}/>
+                <Stack.Screen name='UserHistory' component={UserHistory}/>
+                <Stack.Screen name='SetWithdrawal' component={SetWithdrawal}/>
+                <Stack.Screen name='TransactionHistory' component={TransactionHistory}/>
+                <Stack.Screen name='Learning' component={Learning}/>
+                <Stack.Screen name='AddAmount' component={AddAmount}/>
+                <Stack.Screen name='ManageSupportLinks' component={ManageSupportLinks}/>
+                <Stack.Screen name='CompletedContracts' component={CompletedContracts}/>
+
               </Stack.Navigator>
             </NavigationContainer>
           )

@@ -1,7 +1,7 @@
 // AboutUs.js
 
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Image } from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import { getDatabase, ref, onValue, off } from 'firebase/database';
 
@@ -31,11 +31,10 @@ const UserAgreement = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <AntDesign name="left" size={24} color="#3498db" />
-        </TouchableOpacity>
-        <Text style={styles.headerText}>User Agreement</Text>
+      <View style={{ flexDirection: 'row', marginTop: 30, marginBottom: 20, alignItems: 'center', justifyContent: 'space-between' }}>
+        <AntDesign name='left' style={{}} size={24} onPress={() => navigation.goBack()} />
+        <Text style={{ fontSize: 20, marginLeft: 20, fontWeight: '500' }}>User Agreement</Text>
+        <Image source={require('../assets/TrustNOVALogo.png')} style={{ height: 60, width: 80 }} />
       </View>
 
       <ScrollView style={styles.scrollContainer}>

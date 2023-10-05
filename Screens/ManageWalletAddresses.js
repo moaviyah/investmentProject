@@ -6,6 +6,8 @@ import { getDatabase, ref, set, onValue } from 'firebase/database';
 const ManageWalletAddresses = ({ navigation }) => {
   const [walletAddresses, setWalletAddresses] = useState({});
   const [isLoading, setIsLoading] = useState(true);
+  const [lastUpdateDate, setLastUpdateDate] = useState(null);
+  const [remainingDays, setRemainingDays] = useState(null); // State for remaining days
 
   useEffect(() => {
     const db = getDatabase();
@@ -14,22 +16,47 @@ const ManageWalletAddresses = ({ navigation }) => {
       if (snapshot.exists()) {
         const addressesData = snapshot.val();
         setWalletAddresses(addressesData);
+        setLastUpdateDate(addressesData.lastUpdateDate || null); // Set last update date
         setIsLoading(false);
       }
     });
   }, []);
 
+  useEffect(() => {
+    // Calculate remaining days if lastUpdateDate is set
+    if (lastUpdateDate) {
+      const currentDate = new Date();
+      const differenceInTime = currentDate - new Date(lastUpdateDate);
+      const daysPassed = differenceInTime / (1000 * 3600 * 24);
+      const remainingDays = 15 - daysPassed;
+      setRemainingDays(remainingDays.toFixed());
+    }
+  }, [lastUpdateDate]);
+
   const handleSave = () => {
     const db = getDatabase();
     const walletRef = ref(db, 'addresses');
-    set(walletRef, walletAddresses)
-      .then(() => {
-        alert('Wallet addresses updated successfully.');
-      })
-      .catch((error) => {
-        console.error('Error updating wallet addresses:', error);
-        alert('Failed to update wallet addresses. Please try again later.');
-      });
+
+    // Check if 15 days have passed since the last update
+    if (hasFifteenDaysPassed(lastUpdateDate)) {
+      // Save the current date and time
+      const currentDate = new Date().toISOString();
+      const updatedAddresses = { ...walletAddresses, lastUpdateDate: currentDate };
+
+      set(walletRef, updatedAddresses)
+        .then(() => {
+          alert('Wallet addresses updated successfully.');
+          setWalletAddresses(updatedAddresses); // Update the local state
+          setLastUpdateDate(currentDate); // Update last update date
+          setRemainingDays(15); // Reset remaining days
+        })
+        .catch((error) => {
+          console.error('Error updating wallet addresses:', error);
+          alert('Failed to update wallet addresses. Please try again later.');
+        });
+    } else {
+      alert('You can update the addresses once every 15 days.');
+    }
   };
 
   const handleEditAddress = (chain, text) => {
@@ -37,6 +64,15 @@ const ManageWalletAddresses = ({ navigation }) => {
       ...walletAddresses,
       [chain]: { wallet: text },
     });
+  };
+
+  // Function to check if 15 days have passed
+  const hasFifteenDaysPassed = (lastUpdateDate) => {
+    if (!lastUpdateDate) return true; // If there's no last update date, allow updating
+    const currentDate = new Date();
+    const differenceInTime = currentDate - new Date(lastUpdateDate);
+    const daysPassed = differenceInTime / (1000 * 3600 * 24);
+    return daysPassed >= 15;
   };
 
   return (
@@ -49,16 +85,29 @@ const ManageWalletAddresses = ({ navigation }) => {
       {isLoading ? (
         <Text>Loading...</Text>
       ) : (
-        Object.entries(walletAddresses).map(([chain, address], index) => (
-          <View key={index} style={styles.addressContainer}>
-            <Text style={styles.label}>{chain.toUpperCase()} Address:</Text>
-            <TextInput
-              style={styles.input}
-              value={address.wallet}
-              onChangeText={(text) => handleEditAddress(chain, text)}
-            />
-          </View>
-        ))
+        Object.entries(walletAddresses).map(([chain, address], index) => {
+          // Skip rendering the input for lastUpdateDate
+          if (chain === 'lastUpdateDate') return null;
+
+          return (
+            <View key={index} style={styles.addressContainer}>
+              <Text style={styles.label}>{chain.toUpperCase()} Address:</Text>
+              <TextInput
+                style={styles.input}
+                value={address.wallet}
+                onChangeText={(text) => handleEditAddress(chain, text)}
+              />
+            </View>
+          );
+        })
+      )}
+
+      {remainingDays !== null && (
+        <Text style={styles.remainingText}>
+          {remainingDays > 0
+            ? `You can update the addresses in ${remainingDays} days.`
+            : 'You can update the addresses now.'}
+        </Text>
       )}
 
       <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
@@ -111,6 +160,11 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  remainingText: {
+    fontSize: 18,
+    marginVertical: 10,
+    alignSelf: 'center',
   },
 });
 

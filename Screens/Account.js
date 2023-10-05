@@ -1,4 +1,4 @@
-import { SafeAreaView, StyleSheet, Text, View, Dimensions, TouchableOpacity, Image, ScrollView, Modal, TextInput } from 'react-native'
+import { SafeAreaView, StyleSheet, Text, View, Dimensions, TouchableOpacity, Image, ScrollView, Modal, TextInput, Linking } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { background } from '../color';
 import AntDesign from 'react-native-vector-icons/AntDesign';
@@ -9,7 +9,6 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { signOut } from "firebase/auth";
 import auth from '../config';
-
 import { getDatabase, ref, onValue, off, update } from "firebase/database";
 
 const windowWidth = Dimensions.get('window').width;
@@ -17,11 +16,12 @@ const windowHeight = Dimensions.get('window').height;
 
 
 const Account = ({ navigation }) => {
-  const [link, setLink] = useState('0x71C7656EC7ab88b098defB751B7401B5f6d8976F')
-
+  const [showWithdrawalButton, setShowWithdrawalButton] = useState(false)
   const name = auth.currentUser?.displayName;
   const email = auth.currentUser?.email
   const [balance, setBalance] = useState()
+  const db = getDatabase();
+  const [supportLink, setSupportLink] = useState('');
   const handleSignOut = () => {
     signOut(auth)
       .then(() => {
@@ -34,20 +34,49 @@ const Account = ({ navigation }) => {
   }
 
   useEffect(() => {
-    const db = getDatabase();
+
     const userId = auth.currentUser?.displayName;
+    console.log('name', userId)
     const userRef = ref(db, `users/${userId}`);
-    const Unsubscribe = () => onValue(userRef, (snapshot) => {
+   
+      onValue(userRef, (snapshot) => {
       const data = snapshot.val();
-      const balance = data.balance
+      const balance = data.balance;
       console.log(data.balance);
+      const withdrawalAddress = data.withdrawalAddress;
+      const withdrawalPIN = data.withdrawalPIN;
+      console.log(withdrawalAddress, withdrawalPIN)
+      if (!withdrawalAddress || !withdrawalPIN) {
+        setShowWithdrawalButton(true);
+      }else{
+        setShowWithdrawalButton(false)
+      }
       setBalance(balance);
     });
+  
 
-    return () => {
-      Unsubscribe
-    };
+
   }, []);
+
+  useEffect(() => {
+    const supportLinkRef = ref(db, 'supportLink');
+      onValue(supportLinkRef, (snapshot) => {
+        if (snapshot.exists()) {
+          const link = snapshot.val();
+          setSupportLink(link);
+        }
+      });
+    
+  
+  }, [])
+  
+  const handleSupportClick = () => {
+    if (supportLink) {
+      Linking.openURL(supportLink);
+    } else {
+      alert('Support link is not available.');
+    }
+  };
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView >
@@ -64,7 +93,20 @@ const Account = ({ navigation }) => {
         </TouchableOpacity>
 
         <Text style={styles.account_head}>Account</Text>
-
+        {showWithdrawalButton === true && (
+          <TouchableOpacity
+            style={styles.account_btn}
+            onPress={() => navigation.navigate('SetWithdrawal')}
+          >
+            <MaterialIcons name='account-balance-wallet' size={28} color='#FF9500' />
+            <Text style={styles.btn_head}>Set Withdrawal Credentials</Text>
+            <Ionicons
+              name='chevron-forward-outline'
+              size={24}
+              style={styles.forward_icon}
+            />
+          </TouchableOpacity>
+        )}
         <TouchableOpacity style={styles.account_btn} onPress={() => navigation.navigate('CurrentPlan')}>
           <Image source={require('../assets/return-of-investment.png')} style={{ height: 28, width: 28 }} />
           <Text style={styles.btn_head}>My Investments</Text>
@@ -77,7 +119,7 @@ const Account = ({ navigation }) => {
           <Ionicons name='chevron-forward-outline' size={24} style={styles.forward_icon}></Ionicons>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.account_btn} onPress={() => navigation.navigate('CurrentPlan')}>
+        <TouchableOpacity style={styles.account_btn} onPress={handleSupportClick}>
           <Image source={require('../assets/technical-support.png')} style={{ height: 28, width: 28 }} />
           <Text style={styles.btn_head}>Support</Text>
           <Ionicons name='chevron-forward-outline' size={24} style={styles.forward_icon}></Ionicons>
@@ -101,12 +143,11 @@ const Account = ({ navigation }) => {
           <Ionicons name='chevron-forward-outline' size={24} style={styles.forward_icon}></Ionicons>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.account_btn} onPress={() => navigation.navigate('Admin')}>
+        {/* <TouchableOpacity style={styles.account_btn} onPress={() => navigation.navigate('Admin')}>
           <Image source={require('../assets/agreement.png')} style={{ height: 28, width: 28 }} />
           <Text style={styles.btn_head}>Admin</Text>
           <Ionicons name='chevron-forward-outline' size={24} style={styles.forward_icon}></Ionicons>
-        </TouchableOpacity>
-
+        </TouchableOpacity> */}
 
         <TouchableOpacity onPress={handleSignOut} style={[styles.account_btn, { width: windowWidth * 0.6, alignSelf: 'center', alignItems: 'center', justifyContent: 'center' }]}>
           <MaterialCommunityIcons name='logout' size={28} color={'red'} />

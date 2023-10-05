@@ -15,7 +15,6 @@ export default function SignUp({ navigation }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-    // const [username, setUsername] = useState()
     const [referral, setReferral] = useState('')
     const [dateOfBirth, setDateOfBirth] = useState('')
     const [country, setCountry] = useState()
@@ -237,12 +236,13 @@ export default function SignUp({ navigation }) {
         email: email,
         password: password,
         balance: 0,
-        plan: 'No current',
+        plan: 0,
         earned: 0,
-        // username: username,
         referredBy: referral,
         dateOfBirth:dateOfBirth,
-        country:country
+        country:country,
+        firstRefferalPayment:false,
+        refferalEarning:0
     };
 
     const handleSignUp = (email, password, displayName, referralId) => {
@@ -265,7 +265,6 @@ export default function SignUp({ navigation }) {
                       updateProfile(user, { displayName: username })
                         .then(() => {
                           console.log('Display name updated:', displayName);
-      
                           set(ref(db, `users/${username}`), userData)
                             .then(() => {
                               console.log('User information saved successfully.');
@@ -279,7 +278,8 @@ export default function SignUp({ navigation }) {
                             });
 
                             set(ref(db, `users/${referral}/referrals/${username}`), {
-                                profit: 0
+                                profit: 0,
+                                approved: false
                             }) 
                         })
                         .catch((error) => {

@@ -27,7 +27,14 @@ const Verification = ({ navigation }) => {
         const data = snapshot.val();
         if (data) {
           const verificationStatus = data.verified;
-          setIsDocumentVerified(verificationStatus === true);
+          if(verificationStatus === true){
+            setIsDocumentVerified(true);
+          }else if(verificationStatus === false){
+            setIsDocumentVerified(false)
+          }else{
+            setIsDocumentVerified('Declined')
+          }
+          console.log(verificationStatus)
         } else {
           setIsDocumentVerified(false);
         }
@@ -92,23 +99,23 @@ const Verification = ({ navigation }) => {
           )}
         </TouchableOpacity>
         <Text style={styles.statusText}>
-        Document Verification Status: {isDocumentVerified ? 'Verified' : 'Not Verified'}
+        Document Verification Status: {isDocumentVerified}
       </Text>
         <TouchableOpacity
           style={[
             styles.button,
             {
-              backgroundColor: isDocumentVerified ? '#2ecc71' : '#e74c3c',
+              backgroundColor: isDocumentVerified === true ? '#2ecc71' : '#e74c3c',
             },
           ]}
           onPress={() => {
             navigation.navigate('DocumentVerification');
           }}
-          disabled={isDocumentVerified}
+          disabled={isDocumentVerified === true}
         >
           <AntDesign name="filetext1" size={24} color="#fff" />
           <Text style={styles.buttonText}>
-            {isDocumentVerified ? 'Verified' : 'Verify ID Document'}
+            {isDocumentVerified === true ? 'Verified' : 'Verify ID Document'}
           </Text>
         </TouchableOpacity>
       </View>

@@ -27,7 +27,7 @@ const ManageUsers = ({ navigation }) => {
 
   // Function to navigate to UserDetails screen and pass user data
   const navigateToUserDetails = (user) => {
-    navigation.navigate('UserDetails', { user });
+    navigation.navigate('UserDetails', { user, history: user.history });
   };
 
   return (
@@ -40,11 +40,9 @@ const ManageUsers = ({ navigation }) => {
       />
       <FlatList
         data={users}
-        keyExtractor={(user) => user.username} // Use the document ID as the key
+        keyExtractor={(user) => user.username}
         renderItem={({ item }) => (
-          <TouchableOpacity
-            style={styles.userContainer}
-          >
+          <TouchableOpacity style={styles.userContainer}>
             <View style={styles.userIconContainer}>
               <FontAwesome5 name="user" size={24} color="#3498db" />
             </View>
@@ -54,8 +52,17 @@ const ManageUsers = ({ navigation }) => {
               <Text style={styles.referrals}>
                 Referrals: {item.referrals ? Object.keys(item.referrals).length : 0}
               </Text>
+              <Text style={styles.approvedReferrals}>
+                Approved Referrals: {
+                  item.referrals ?
+                    Object.values(item.referrals).filter((referral) => referral.approved).length : 0
+                }
+              </Text>
             </View>
-            <TouchableOpacity style={styles.detailsButton} onPress={() => navigateToUserDetails(item)}>
+            <TouchableOpacity
+              style={styles.detailsButton}
+              onPress={() => navigateToUserDetails(item)}
+            >
               <Text style={styles.detailsButtonText}>Details</Text>
             </TouchableOpacity>
           </TouchableOpacity>
@@ -75,7 +82,7 @@ const styles = StyleSheet.create({
   },
   backButton: {
     marginTop: 35,
-    marginBottom: 20, 
+    marginBottom: 20,
   },
   userContainer: {
     backgroundColor: '#ffffff',
@@ -118,6 +125,11 @@ const styles = StyleSheet.create({
   detailsButtonText: {
     color: 'white',
     fontWeight: 'bold',
+  },
+  approvedReferrals: {
+    fontSize: 16,
+    marginBottom: 5,
+    color: '#555',
   },
 });
 

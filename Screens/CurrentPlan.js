@@ -64,7 +64,7 @@ const CurrentPlan = ({ navigation }) => {
             $ {plan}
           </Text>
           <Text style={{ fontWeight: '500', fontSize:16 }}>
-            $ {plan + profit}
+            $ {parseFloat(plan) + parseFloat(profit)}
           </Text>
         </View>
 

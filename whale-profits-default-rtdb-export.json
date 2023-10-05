@@ -1,269 +1,227 @@
 {
   "Documents": {
-    "moaviyaakram": {
-      "backImage": "https://firebasestorage.googleapis.com/v0/b/whale-profits.appspot.com/o/Document_image%2F1695746312140_0.jpg?alt=media&token=14801dd0-806e-431a-a2e8-305e33bd2b4e",
-      "frontImage": "https://firebasestorage.googleapis.com/v0/b/whale-profits.appspot.com/o/Document_image%2F1695746302643_0.jpg?alt=media&token=3a11235b-8ea6-4e0b-8e30-2ee0b17cee87",
+    "558107": {
+      "backImage": "https://firebasestorage.googleapis.com/v0/b/whale-profits.appspot.com/o/Document_image%2F1696355236270_0.jpeg?alt=media&token=dd0f3815-192a-4d34-bf91-571032d124ca",
+      "frontImage": "https://firebasestorage.googleapis.com/v0/b/whale-profits.appspot.com/o/Document_image%2F1696355227168_0.jpeg?alt=media&token=09b473af-408a-47c1-87a4-c6510e22605e",
       "verified": true
+    },
+    "767740": {
+      "backImage": "https://firebasestorage.googleapis.com/v0/b/whale-profits.appspot.com/o/Document_image%2F1696178099397_0.jpeg?alt=media&token=ec8a22e3-4011-42ce-a23b-7add7414a931",
+      "frontImage": "https://firebasestorage.googleapis.com/v0/b/whale-profits.appspot.com/o/Document_image%2F1696178069562_0.jpeg?alt=media&token=0ab5e2e0-f905-4b96-a542-f0189394c820",
+      "verified": true
+    },
+    "793175": {
+      "backImage": "https://firebasestorage.googleapis.com/v0/b/whale-profits.appspot.com/o/Document_image%2F1696180322989_0.jpeg?alt=media&token=eede4948-350b-42d1-8beb-b69fd16d9360",
+      "frontImage": "https://firebasestorage.googleapis.com/v0/b/whale-profits.appspot.com/o/Document_image%2F1696180314612_0.jpeg?alt=media&token=1770bbb4-f460-4d9d-b639-5022161dab2a",
+      "verified": false
     }
   },
-  "requests": {
-    "-NfBTeAWIjnlXYDJLQCh": {
-      "amount": "500",
-      "id": "AKpWm72ecIfhuwJMIQ43c2KgBED2",
-      "request": "Withdraw",
-      "requestId": "-NfBTeAWIjnlXYDJLQCh",
-      "status": "Completed",
-      "timestamp": 1695647699363,
-      "username": "moaviyaakram"
+  "aboutus": "sdafljk aidsfj isdf aiosf oaisjfd  sojfa sodjf so ef ",
+  "addresses": {
+    "USDT(BEP-20)": {
+      "wallet": "test address"
     },
-    "-NfBVcO668AwsbQlujVz": {
+    "USDT(TRC-20)": {
+      "wallet": "test trx address"
+    },
+    "lastUpdateDate": "2023-09-30T11:47:56.535Z"
+  },
+  "completedContracts": {
+    "793175": {
+      "balance": 1600,
+      "date": "2023-10-05T11:24:23.502Z",
+      "level": 1,
+      "plan": 200
+    }
+  },
+  "courses": {
+    "-Ng-0nsXe325A7Csb-0v": {
+      "id": "-Ng-0nsXe325A7Csb-0v",
+      "links": [
+        {
+          "link": "Link1",
+          "title": "Link Title 1"
+        }
+      ],
+      "title": "learning Investments"
+    }
+  },
+  "learning": {
+    "-NflTg6OQz71ethTyz-c": {
+      "link": "https://www.youtube.com/watch?v=K1N7PB72ecA&ab_channel=AMTEE",
+      "title": "This video contains learning about investment"
+    },
+    "-NflU0iRYV8kH075opde": {
+      "link": "gfdh",
+      "title": "rtdyd"
+    },
+    "-NfqgCTnuivnKZjbEb2j": {
+      "link": "sdafasdfdf",
+      "title": "asfasdf"
+    }
+  },
+  "oneTimeRefferalPayment": {
+    "percentage": 10
+  },
+  "plans": [
+    null,
+    {
+      "amount": "200",
+      "level": "1",
+      "potentialEarning": "1000"
+    },
+    {
+      "amount": "400",
+      "level": "2",
+      "potentialEarning": "2000"
+    },
+    {
+      "amount": "600",
+      "level": "3",
+      "potentialEarning": "3000"
+    },
+    {
+      "amount": "800",
+      "level": "4",
+      "potentialEarning": "4000"
+    },
+    {
       "amount": "1000",
-      "id": "AKpWm72ecIfhuwJMIQ43c2KgBED2",
-      "request": "Deposit",
-      "requestId": "-NfBVcO668AwsbQlujVz",
-      "status": "Rejected",
-      "timestamp": 1695648216330,
-      "trxId": "test txt id",
-      "username": "moaviyaakram"
+      "level": "5",
+      "potentialEarning": "5000"
     },
-    "-NfBhbgWSDM6Sp6tjCs9": {
-      "amount": "200",
-      "id": "AKpWm72ecIfhuwJMIQ43c2KgBED2",
-      "request": "Deposit",
-      "requestId": "-NfBhbgWSDM6Sp6tjCs9",
-      "status": "Completed",
-      "timestamp": 1695651621348,
-      "trxId": "0x6fBEb69011a02216a3Ed618C26fD5B71fC401193",
-      "username": "moaviyaakram"
-    },
-    "-NfBtuFX-6tar_g4FJC-": {
-      "amount": "52000",
-      "id": "AKpWm72ecIfhuwJMIQ43c2KgBED2",
-      "request": "Deposit",
-      "requestId": "-NfBtuFX-6tar_g4FJC-",
-      "status": "Completed",
-      "timestamp": 1695654843284,
-      "trxId": "trx test id ",
-      "username": "moaviyaakram"
-    },
-    "-NfBuY7N22RotlPS07vH": {
-      "amount": "100",
-      "id": "AKpWm72ecIfhuwJMIQ43c2KgBED2",
-      "request": "Withdraw",
-      "requestId": "-NfBuY7N22RotlPS07vH",
-      "status": "Completed",
-      "timestamp": 1695655010696,
-      "username": "moaviyaakram"
-    },
-    "-NfBulanT8NSmVio6K5S": {
-      "amount": "100",
-      "id": "AKpWm72ecIfhuwJMIQ43c2KgBED2",
-      "request": "Deposit",
-      "requestId": "-NfBulanT8NSmVio6K5S",
-      "status": "Completed",
-      "timestamp": 1695655069988,
-      "trxId": "id",
-      "username": "moaviyaakram"
-    },
-    "-NfBvUiEYC76WblUpdk7": {
-      "amount": "200",
-      "id": "AKpWm72ecIfhuwJMIQ43c2KgBED2",
-      "request": "Deposit",
-      "requestId": "-NfBvUiEYC76WblUpdk7",
-      "status": "Completed",
-      "timestamp": 1695655258879,
-      "trxId": "Ifrrtedscb",
-      "username": "moaviyaakram"
-    },
-    "-NfCmmBVlhgu-5i696mW": {
-      "amount": "50",
-      "id": "AKpWm72ecIfhuwJMIQ43c2KgBED2",
-      "request": "Deposit",
-      "requestId": "-NfCmmBVlhgu-5i696mW",
-      "status": "Completed",
-      "timestamp": 1695669752465,
-      "trxId": "id",
-      "username": "moaviyaakram"
-    },
-    "-NfCn14vjOTBgaAPovXG": {
-      "amount": "50",
-      "id": "AKpWm72ecIfhuwJMIQ43c2KgBED2",
-      "request": "Deposit",
-      "requestId": "-NfCn14vjOTBgaAPovXG",
-      "status": "Completed",
-      "timestamp": 1695669817579,
-      "trxId": "id",
-      "username": "moaviyaakram"
-    },
-    "-NfCnJeh6Vf5me96MuP-": {
-      "amount": "100",
-      "id": "AKpWm72ecIfhuwJMIQ43c2KgBED2",
-      "request": "Deposit",
-      "requestId": "-NfCnJeh6Vf5me96MuP-",
-      "status": "Completed",
-      "timestamp": 1695669893662,
-      "trxId": "fds",
-      "username": "moaviyaakram"
-    },
-    "-NfCnws9obervilqnZpC": {
-      "amount": "200",
-      "id": "AKpWm72ecIfhuwJMIQ43c2KgBED2",
-      "request": "Deposit",
-      "requestId": "-NfCnws9obervilqnZpC",
-      "status": "Completed",
-      "timestamp": 1695670058363,
-      "trxId": "sdasd",
-      "username": "moaviyaakram"
-    },
-    "-NfCoDGA06q-24UZJAuL": {
-      "amount": "200",
-      "id": "AKpWm72ecIfhuwJMIQ43c2KgBED2",
-      "request": "Deposit",
-      "requestId": "-NfCoDGA06q-24UZJAuL",
-      "status": "Completed",
-      "timestamp": 1695670129595,
-      "trxId": "adsfsdfasd",
-      "username": "moaviyaakram"
-    },
-    "-NfDNGCF95NF01rGc-gt": {
-      "amount": "1000",
-      "id": "gjU2Y2B3FlbD8iSCgEGZJyPHLZ03",
-      "request": "Deposit",
-      "requestId": "-NfDNGCF95NF01rGc-gt",
-      "status": "Completed",
-      "timestamp": 1695679578800,
-      "trxId": "erwr",
-      "username": "Taimoor"
-    },
-    "-NfGSK6uM9cpd10rB46i": {
+    {
       "amount": "1500",
-      "id": "PwMctuSlBHWWNFzIndYsyM88hZO2",
-      "request": "Deposit",
-      "requestId": "-NfGSK6uM9cpd10rB46i",
-      "status": "Completed",
-      "timestamp": 1695731241005,
-      "trxId": "Ftij",
-      "username": "Zuqi"
+      "level": "6",
+      "potentialEarning": "7500"
     },
-    "-NfQemQU7HyGqGMA6B9e": {
-      "amount": "500",
-      "id": "81tAP7uJnyawUUCJeIQsyb17Pyc2",
-      "request": "Deposit",
-      "requestId": "-NfQemQU7HyGqGMA6B9e",
-      "status": "Completed",
-      "timestamp": 1695902541204,
-      "trxId": "trx id test",
-      "username": "moaviyaakram"
-    },
-    "-NfQoBlv6qMCWZDxJh0Q": {
-      "amount": "500",
-      "id": "VHoYnwmk9ZMiysy664xPHZq1ogC2",
-      "request": "Deposit",
-      "requestId": "-NfQoBlv6qMCWZDxJh0Q",
-      "status": "Completed",
-      "timestamp": 1695905008348,
-      "trxId": "dsafasdf",
-      "username": "Ehsan"
-    },
-    "-NfR-QeUgxQHCAuhqIbB": {
-      "amount": "500",
-      "id": "wnVALX9uFZVn89czA1EfjIgnwJX2",
-      "request": "Deposit",
-      "requestId": "-NfR-QeUgxQHCAuhqIbB",
-      "status": "Completed",
-      "timestamp": 1695908215026,
-      "trxId": "dsaASD",
-      "username": "316993"
-    },
-    "-NfR1Di9uW_h32k1wWuS": {
-      "amount": "500",
-      "id": "6ZDqNWKfXmXDoGR2IVuldwGxbgi2",
-      "request": "Deposit",
-      "requestId": "-NfR1Di9uW_h32k1wWuS",
-      "status": "Completed",
-      "timestamp": 1695908686382,
-      "trxId": "sfdfasdf",
-      "username": "348728"
-    },
-    "-NfRBnv4gU6VE2_8fo1H": {
-      "amount": "500",
-      "id": "81tAP7uJnyawUUCJeIQsyb17Pyc2",
-      "request": "Deposit",
-      "requestId": "-NfRBnv4gU6VE2_8fo1H",
-      "status": "Completed",
-      "timestamp": 1695911460162,
-      "trxId": "chgcg",
-      "username": "moaviyaakram"
+    {
+      "amount": "2000",
+      "level": "7",
+      "potentialEarning": "10000"
     }
+  ],
+  "popupConfig": {
+    "imageUrl": "https://firebasestorage.googleapis.com/v0/b/whale-profits.appspot.com/o/PopUp_image.jpg?alt=media&token=d8c16e5f-21b0-4e94-83c7-d4524b81f7e4",
+    "isEnabled": true,
+    "text": "This is the watch you should buy beacause it is a very expensice and good watch and you will look handsome in wearing that watch"
   },
+  "privacypolicy": "jhfsdauhfaisodfh oasodifj awief saidf asidf ewif slkdafj aieufj asdifj aoiefj sioeuf asodjfawoi eur fasofa soifu aeiru aoewirjawoiefuaoieu fawieruao sidu oweu roiaje ur eoiwuriowe or aowuer oiwuer iauwefaoshfi ei rw aruoiw a ewiuroai  aeoiu ",
+  "supportLink": "https://www.youtube.com/watch?v=tw8iapinxou&ab_channel=almaferovi%c4%87-topic",
+  "userAgreement": "My name is maviya",
   "users": {
-    "316993": {
-      "balance": 250,
-      "country": "Pakistan",
-      "dateOfBirth": "11122002",
-      "earned": 225,
-      "email": "hamzaakram@gmail.com",
-      "lastUpdate": "2023-09-28T13:41:10.563Z",
-      "name": "Hamza Akram",
-      "password": "muslimmodels",
-      "plan": 200,
-      "referrals": {
-        "348728": {
-          "profit": 0
-        }
-      },
-      "referredBy": "348728",
-      "refferalEarning": 25
-    },
-    "348728": {
-      "balance": 250,
-      "country": "Bahamas",
-      "dateOfBirth": "11124552",
-      "earned": 225,
-      "email": "bilalkhan@gmail.com",
-      "lastUpdate": "2023-09-28T13:45:28.933Z",
-      "name": "Bilal Khan",
-      "password": "muslimmodels",
-      "plan": 200,
-      "referredBy": "316993",
-      "refferalEarning": 25
-    },
-    "moaviyaakram": {
-      "balance": 0,
-      "country": "Australia",
-      "dateOfBirth": "11122002",
+    "793175": {
+      "balance": 1600,
+      "country": "Belgium",
+      "dateOfBirth": "11222022",
       "earned": 0,
-      "email": "maviyaakram6@gmail.com",
-      "isBlocked": false,
-      "lastUpdate": "2023-09-28T12:02:44.376Z",
-      "name": "Maviya Akram",
-      "password": "iammoaviya",
-      "plan": 400,
-      "referrals": {
-        "316993": {
-          "profit": 0
+      "email": "isafeer416@gmail.com",
+      "firstRefferalPayment": false,
+      "history": {
+        "-NflaLeV-P3aYtGLX5-g": {
+          "Type": "Earning",
+          "amount": 100,
+          "date": "10/2/2023",
+          "time": "11:14:37 PM"
         },
-        "853659": {
-          "profit": 0
+        "-NflbIomcmcjxSR62Ic9": {
+          "Type": "Earning",
+          "amount": 100,
+          "date": "10/2/2023",
+          "time": "11:18:47 PM"
         },
-        "Ehsan": {
-          "profit": 0
+        "-NflbQdKa5iQ5nin1zLe": {
+          "Type": "Earning",
+          "amount": 100,
+          "date": "10/2/2023",
+          "time": "11:19:19 PM"
+        },
+        "-NflbW8fUzqT1ZVjf3iW": {
+          "Type": "Earning",
+          "amount": 100,
+          "date": "10/2/2023",
+          "time": "11:19:42 PM"
+        },
+        "-NflbyAUCXxWG6s-HWJW": {
+          "Type": "Earning",
+          "amount": 100,
+          "date": "10/2/2023",
+          "time": "11:21:41 PM"
+        },
+        "-NflcG44JYBBztnG-bUU": {
+          "Type": "Earning",
+          "amount": 100,
+          "date": "10/2/2023",
+          "time": "11:22:58 PM"
+        },
+        "-NflceHQ2qS9vuoQHBJ8": {
+          "Type": "Earning",
+          "amount": 100,
+          "date": "10/2/2023",
+          "time": "11:24:41 PM"
+        },
+        "-NflcqEEkXQVRaqBpi5S": {
+          "Type": "Earning",
+          "amount": 100,
+          "date": "10/2/2023",
+          "time": "11:25:30 PM"
+        },
+        "-NflctaacTQC9gty5alC": {
+          "Type": "Earning",
+          "amount": 100,
+          "date": "10/2/2023",
+          "time": "11:25:44 PM"
+        },
+        "-Nfld4mnoaaAno9oMnHl": {
+          "Type": "Earning",
+          "amount": 100,
+          "date": "10/2/2023",
+          "time": "11:26:34 PM"
+        },
+        "-Nfldl3bl_S5TdF1vawP": {
+          "Type": "Earning",
+          "amount": 100,
+          "date": "10/2/2023",
+          "time": "11:29:31 PM"
+        },
+        "-NflevFHj8_hS75Qu4B-": {
+          "Type": "Earning",
+          "amount": 100,
+          "date": "10/2/2023",
+          "time": "11:34:35 PM"
+        },
+        "-NfpnnMlSMdOv9uxeY9e": {
+          "Type": "Earning",
+          "amount": 100,
+          "date": "10/3/2023",
+          "time": "6:51:53 PM"
+        },
+        "-Nfpo3kzEJWnMwwM66Xx": {
+          "Type": "Earning",
+          "amount": 100,
+          "date": "10/3/2023",
+          "time": "6:53:04 PM"
+        },
+        "-NfpoIugZo6BBF4fo4mQ": {
+          "Type": "Earning",
+          "amount": 100,
+          "date": "10/3/2023",
+          "time": "6:54:06 PM"
+        },
+        "-NfpoSasDkTZCtQ3_cpC": {
+          "Type": "Earning",
+          "amount": 100,
+          "date": "10/3/2023",
+          "time": "6:54:46 PM"
         }
       },
-      "referredBy": "Zuqi",
+      "lastUpdate": "2023-09-30T14:23:13.389Z",
+      "level": 0,
+      "name": "zain Alamgir",
+      "password": "safeer123",
+      "plan": 0,
+      "referredBy": "767740",
       "refferalEarning": 0
     }
-  },
-  "wallet": {
-    "addresses": [
-      {
-        "chain": "bep20",
-        "walletAddress": "wallet address bnb"
-      },
-      {
-        "chain": "trc",
-        "walletAddress": "wallet address trc"
-      }
-    ]
   }
 }

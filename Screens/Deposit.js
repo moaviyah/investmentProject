@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { getDatabase, ref, set, push, onValue } from 'firebase/database';
+import { getDatabase, ref, set, push, onValue, get } from 'firebase/database';
 import auth from '../config';
 import { useClipboard } from '@react-native-community/clipboard';
 import { Picker } from '@react-native-picker/picker';
@@ -20,7 +20,9 @@ import { Picker } from '@react-native-picker/picker';
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
-const Deposit = ({ navigation }) => {
+const Deposit = ({ navigation, route }) => {
+  const {planAmount, planLevel} = route.params
+  console.log(planAmount, planLevel)
   const userId = auth.currentUser?.uid;
   const [amount, setAmount] = useState('Enter amount');
   const [isCopied, setIsCopied] = useState(false);
@@ -28,18 +30,23 @@ const Deposit = ({ navigation }) => {
   const [selectedChain, setSelectedChain] = useState('bnb'); // Default selected chain
   const [walletAddresses, setWalletAddresses] = useState({});
   const [address, setAddress] = useState('');
+  const name = auth.currentUser?.displayName;
+useEffect(() => {
+  const db = getDatabase();
+  const walletRef = ref(db, 'addresses');
+  onValue(walletRef, (snapshot) => {
+    if (snapshot.exists()) {
+      const addressesData = snapshot.val();
+      
+      // Filter out the "lastUpdateDate" property
+      const filteredAddressesData = { ...addressesData };
+      delete filteredAddressesData.lastUpdateDate;
 
-  useEffect(() => {
-    const db = getDatabase();
-    const walletRef = ref(db, 'addresses');
-    onValue(walletRef, (snapshot) => {
-      if (snapshot.exists()) {
-        const addressesData = snapshot.val();
-        setWalletAddresses(addressesData);
-        setAddress(addressesData[selectedChain]?.wallet || '');
-      }
-    });
-  }, [selectedChain]);
+      setWalletAddresses(filteredAddressesData);
+      setAddress(filteredAddressesData[selectedChain]?.wallet || '');
+    }
+  });
+}, [selectedChain]);
 
   const copyToClipboard = () => {
     Clipboard.setString(address);
@@ -59,31 +66,51 @@ const Deposit = ({ navigation }) => {
 
   function post_request() {
     if (amount === '' || trxId === '') {
-      return Alert.alert('Please Enter Amount and TrxId of the transfer to proceed.');
+      return Alert.alert('Please Enter TrxId of the transfer to proceed.');
     }
-
-    console.log(auth.currentUser.displayName);
+  
     const db = getDatabase();
     const request = ref(db, 'requests');
     const newRequestRef = push(request);
     const reqId = newRequestRef.key;
-    console.log(reqId);
-    set(newRequestRef, {
-      amount: amount,
-      status: 'Pending',
-      id: userId,
-      request: 'Deposit',
-      timestamp: Date.now(),
-      requestId: reqId,
-      username: auth.currentUser.displayName,
-      trxId: trxId,
-      chain:selectedChain
-    });
-
-    Alert.alert('Request posted. Please wait for response');
-    console.log('success');
-    navigation.goBack();
+  
+    // Fetch the current user's data
+    const userRef = ref(db, `users/${name}`);
+    get(userRef)
+      .then((snapshot) => {
+        if (snapshot.exists()) {
+          const userData = snapshot.val();
+          const referredBy = userData.referredBy || '';
+  
+          set(newRequestRef, {
+            amount: planAmount,
+            status: 'Pending',
+            id: userId,
+            request: 'Deposit',
+            timestamp: Date.now(),
+            requestId: reqId,
+            username: auth.currentUser.displayName,
+            trxId: trxId,
+            chain: selectedChain,
+            level: planLevel,
+            referredBy: referredBy, // Include referredBy in the request
+          });
+  
+          Alert.alert('Request posted. Please wait for a response');
+          console.log('success');
+          navigation.goBack();
+        } else {
+          // Handle the case where the user's data does not exist
+          Alert.alert('Error', 'User data not found.');
+        }
+      })
+      .catch((error) => {
+        // Handle error
+        Alert.alert('Error', 'Unable to post the request. Please try again later.');
+        console.error('Error fetching user data:', error.message);
+      });
   }
+  
 
   return (
     <View style={styles.modal}>
@@ -122,32 +149,9 @@ const Deposit = ({ navigation }) => {
         </Text>
 
         <View style={styles.add_container}>
-          <TextInput style={styles.amountInput} placeholder={amount} placeholderTextColor="black" onChangeText={handleAmountChange} editable={false} />
+          <TextInput style={styles.amountInput} placeholder={planAmount} placeholderTextColor="black"  editable={false} />
         </View>
 
-        <View style={styles.setnumber_container}>
-          <TouchableOpacity onPress={() => handleButtonClick(200)} style={styles.num_btn}>
-            <Text>200</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => handleButtonClick(400)} style={styles.num_btn}>
-            <Text>400</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => handleButtonClick(600)} style={styles.num_btn}>
-            <Text>600</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => handleButtonClick(800)} style={styles.num_btn}>
-            <Text>800</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => handleButtonClick(1000)} style={styles.num_btn}>
-            <Text>1000</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => handleButtonClick(1500)} style={styles.num_btn}>
-            <Text>1500</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => handleButtonClick(2000)} style={styles.num_btn}>
-            <Text>2000</Text>
-          </TouchableOpacity>
-        </View>
         <View style={styles.add_container}>
           <TextInput style={styles.amountInput} placeholder="Trx Id" placeholderTextColor="#9B9B9B" onChangeText={(text) => setTrxId(text)} value={trxId} />
         </View>

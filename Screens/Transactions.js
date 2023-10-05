@@ -47,14 +47,27 @@ const Transactions = () => {
     return daysOfWeek[dayIndex];
   };
   const formatTime = (timestamp) => {
-  const date = new Date(timestamp);
-  const hours = date.getHours();
-  const minutes = date.getMinutes();
-  const ampm = hours >= 12 ? 'pm' : 'am';
-  const formattedHours = hours % 12 === 0 ? 12 : hours % 12;
-  const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
-  return `${formattedHours}:${formattedMinutes} ${ampm}`;
-};
+    const date = new Date(timestamp);
+    const day = date.getDate();
+    const monthIndex = date.getMonth();
+    const year = date.getFullYear() % 100; // Get the last two digits of the year
+    const formattedDate = `${day} ${getMonthName(monthIndex)} ${year}`;
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    const ampm = hours >= 12 ? 'pm' : 'am';
+    const formattedHours = hours % 12 === 0 ? 12 : hours % 12;
+    const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+    return `${formattedDate} ${formattedHours}:${formattedMinutes} ${ampm}`;
+  };
+  
+  const getMonthName = (monthIndex) => {
+    const months = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    return months[monthIndex];
+  };
+  
 
   return (
     <ScrollView style={styles.container}>
@@ -89,7 +102,7 @@ const Transactions = () => {
             <View style={styles.cardRow}>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <Ionicons name="time-outline" size={20} color="gray" />
-                <Text style={[styles.cardText, { fontWeight: '300' }]}>{getDayName(request.timestamp)} {formatTime(request.timestamp)} </Text>
+                <Text style={[styles.cardText, { fontWeight: '300' }]}>{formatTime(request.timestamp)} </Text>
               </View>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <Text>Amount:</Text>

@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, Button, FlatList, Alert, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TextInput, Button, FlatList, Alert, TouchableOpacity, ScrollView } from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import { Picker } from '@react-native-picker/picker';
-import { getDatabase, ref, onValue, update, off, get } from 'firebase/database';
+import { getDatabase, ref, onValue, update, off, get,push } from 'firebase/database';
 import { primary } from '../color';
 
 const ManageInvestments = ({ navigation }) => {
   // State to store the selected plan level and entered amount
-  const [selectedPlanLevel, setSelectedPlanLevel] = useState('Plan 200');
+  const [selectedPlanLevel, setSelectedPlanLevel] = useState('Select Plan');
   const [amount, setAmount] = useState('');
   const [eligibleUsers, setEligibleUsers] = useState([]);
   const [users, setUsers] = useState([]);
+  const [percentage, setPercentage] = useState('')
   const db = getDatabase();
 
   // Fetch user data from Firebase Realtime Database
@@ -29,6 +30,7 @@ const ManageInvestments = ({ navigation }) => {
           };
         });
         setUsers(userList);
+        console.log(userList)
       } else {
         console.log('no Data')
       }
@@ -37,16 +39,17 @@ const ManageInvestments = ({ navigation }) => {
 
   // Function to calculate the distributed amount for each user
   const calculateDistributedAmount = () => {
+
     if (selectedPlanLevel === 'Select Plan') {
       Alert.alert('Please Select a Plan');
-    } else if (amount === '') {
-      Alert.alert('Please Enter an Amount to Distribute');
+    } else if (amount === '' || percentage === '') {
+      Alert.alert('Please Enter an Amount to Distribute and percentage for agents');
     } else {
       const distributionAmount = parseFloat(amount);
-
+      console.log('distrubuted amount', distributionAmount, 'selected Plan', selectedPlanLevel)
       // Filter users based on the selected plan level
       const filteredUsers = users.filter((user) => user.plan === parseInt(selectedPlanLevel));
-
+      console.log(filteredUsers)
       if (filteredUsers.length === 0) {
         // No eligible users
         setEligibleUsers([]);
@@ -61,7 +64,7 @@ const ManageInvestments = ({ navigation }) => {
         const referralBonus = user.referredBy ? 0.1 * userShare : 0; // 10% referral bonus
         return {
           ...user,
-          distributedAmount: userShare ,
+          distributedAmount: userShare,
           parentRefferal: referralBonus
         };
       });
@@ -71,80 +74,94 @@ const ManageInvestments = ({ navigation }) => {
     }
   };
 
-const handleConfirm = async () => {
-  try {
-    const updates = {};
-    
-    // Step 1: Update the user's balance in Firebase
-    eligibleUsers.forEach((user) => {
-      const distributedAmount = user.distributedAmount;
-      const referralBonus = user.referredBy ? 0.1 * distributedAmount : 0;
-      const remainingAmount = distributedAmount - referralBonus;
-      const earnedAmount = user?.earned || 0;
-
-      // Update the balance field in Firebase
-      const newBalance = user.balance + remainingAmount + earnedAmount; // Add both earned and referral bonuses
-      updates[`users/${user.username}/balance`] = newBalance;
-      updates[`users/${user.username}/earned`] = earnedAmount + remainingAmount;
-    });
+  const handleConfirm = async () => {
+    const percent = percentage/100
+    console.log('Percentage', percent)
+    try {
+      const updates = {};  
+      const timestamp = new Date().toISOString();                                                                               
+      // Step 1: Update the user's balance in Firebase
+      eligibleUsers.forEach((user) => {
+        const distributedAmount = parseFloat(user.distributedAmount);
+        const remainingAmount = parseFloat(distributedAmount);
+        const earnedAmount = parseFloat(user?.earned || 0);
+        // Update the balance field in Firebase
+        const newBalance = parseFloat(user.balance) + remainingAmount; // Add both earned and referral bonuses
+        updates[`users/${user.username}/balance`] = newBalance;
+        updates[`users/${user.username}/earned`] = earnedAmount + remainingAmount;
+        const distributionEntry = {
+          amount: remainingAmount,
+          Type:'Earning',
+          date: new Date(timestamp).toLocaleDateString(), // Format the date as desired
+          time: new Date(timestamp).toLocaleTimeString(), // Format the time as desired
+        };
   
-    // Perform the batch update for balance in Firebase
-    await update(ref(db), updates);
+        // Push the distribution entry to the user's history
+        const userHistoryRef = ref(db, `users/${user.username}/history`);
+        push(userHistoryRef, distributionEntry);
+      });
 
-    // Step 2: Fetch the updated user data from Firebase
-    const snapshot = await get(ref(db, 'users'));
-    const usersData = snapshot.val() || {};
+      // Perform the batch update for balance in Firebase
+      await update(ref(db), updates);
 
-    // Step 3: Calculate and distribute profits to referred users
-    const referralGroups = {};
-    eligibleUsers.forEach((user) => {
-      // Group eligible users by their referrer
-      if (user.referredBy) {
-        if (!referralGroups[user.referredBy]) {
-          referralGroups[user.referredBy] = [];
+      // Step 2: Fetch the updated user data from Firebase
+      const snapshot = await get(ref(db, 'users'));
+      const usersData = snapshot.val() || {};
+
+      // Step 3: Calculate and distribute profits to referred users
+      const referralGroups = {};
+      eligibleUsers.forEach((user) => {
+        // Group eligible users by their referrer
+        if (user.referredBy) {
+          if (!referralGroups[user.referredBy]) {
+            referralGroups[user.referredBy] = [];
+          }
+          referralGroups[user.referredBy].push(user);
         }
-        referralGroups[user.referredBy].push(user);
-      }
-    });
+      });
 
-    // Step 4: Update referral earnings for referrers and calculate total referral bonuses
-    for (const referrerUsername in referralGroups) {
-      if (referralGroups.hasOwnProperty(referrerUsername)) {
-        const referredUsers = referralGroups[referrerUsername];
-        const totalReferralBonus = referredUsers.reduce((total, referredUser) => {
-          return total + (0.1 * referredUser.distributedAmount);
-        }, 0);
-
-        // Calculate the updated balance for the referrer, including referral bonuses
-        const referrerBalance = usersData[referrerUsername]?.balance || 0;
-        const newReferrerBalance = referrerBalance + totalReferralBonus;
-        
-        // Update the balance and referral earnings for this referrer
-        updates[`users/${referrerUsername}/balance`] = newReferrerBalance;
-        updates[`users/${referrerUsername}/refferalEarning`] = totalReferralBonus; // Update referral earnings
+      // Step 4: Update referral earnings for referrers and calculate total referral bonuses
+      for (const referrerUsername in referralGroups) {
+        if (referralGroups.hasOwnProperty(referrerUsername)) {
+          const referredUsers = referralGroups[referrerUsername];
+          const totalReferralBonus = referredUsers.reduce((total, referredUser) => {
+            return total + (percent * parseFloat(referredUser.distributedAmount));
+          }, 0);
+          if(usersData[referrerUsername]?.isAgent === true){
+          // Calculate the updated balance for the referrer, including referral bonuses
+          const referrerBalance = parseFloat(usersData[referrerUsername]?.balance || 0);
+          const newReferrerBalance = parseFloat(referrerBalance + totalReferralBonus);
+          const reffererEarningByRefferal = parseFloat(usersData[referrerUsername]?.refferalEarning || 0)
+          // Update the balance and referral earnings for this referrer
+          updates[`users/${referrerUsername}/balance`] = newReferrerBalance;
+          updates[`users/${referrerUsername}/refferalEarning`] = totalReferralBonus + reffererEarningByRefferal; // Update referral earnings
+          const distributionEntry = {
+            amount: totalReferralBonus,
+            Type:'Refferal Bonus',
+            date: new Date(timestamp).toLocaleDateString(), // Format the date as desired
+            time: new Date(timestamp).toLocaleTimeString(), // Format the time as desired
+          };
+    
+          // Push the distribution entry to the user's history
+          const userHistoryRef = ref(db, `users/${referrerUsername}/history`);
+          push(userHistoryRef, distributionEntry);
+        }
+        }
       }
+
+      // Step 5: Perform the final batch update for referral earnings and balance in Firebase
+      await update(ref(db), updates);
+
+      // Step 6: Clear state and show success message
+      setSelectedPlanLevel();
+      setAmount();
+      setEligibleUsers([]);
+      Alert.alert('Distributed successfully');
+    } catch (error) {
+      console.error('Error distributing: ', error);
+      Alert.alert('Error distributing amount');
     }
-  
-    // Step 5: Perform the final batch update for referral earnings and balance in Firebase
-    await update(ref(db), updates);
-
-    // Step 6: Clear state and show success message
-    setSelectedPlanLevel();
-    setAmount();
-    setEligibleUsers([]);
-    Alert.alert('Distributed successfully');
-  } catch (error) {
-    console.error('Error distributing: ', error);
-    Alert.alert('Error distributing amount');
-  }
-};
-
-  
-  
-  
-  
-  
-
+  };
 
   return (
     <View style={styles.container}>
@@ -179,8 +196,16 @@ const handleConfirm = async () => {
         value={amount}
         onChangeText={(text) => setAmount(text)}
       />
+       <Text style={styles.label}>Enter Percentage for agents:</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="%"
+        keyboardType="numeric"
+        value={percentage}
+        onChangeText={(text) => setPercentage(text)}
+      />
 
-      <Button title="Calculate Distributed Amount" onPress={calculateDistributedAmount} color={primary}/>
+      <Button title="Calculate Distributed Amount" onPress={calculateDistributedAmount} color={primary} />
 
 
       {eligibleUsers.length === 0 ? (
@@ -190,25 +215,25 @@ const handleConfirm = async () => {
 
       ) : (
         <View>
-        <FlatList
-          data={eligibleUsers}
-          keyExtractor={(item) => item.username}
-          renderItem={({ item }) => (
-            <View style={styles.userItem}>
-              <Text>{`Id: ${item.username || 'N/A'}`}</Text>
-              <Text>{`User: ${item.name || 'N/A'}`}</Text>
-              <Text>{`Plan Level: $${item.plan || 'N/A'}`}</Text>
-              <Text>{`Referred By: ${item.referredBy || 'None'}`}</Text>
-              <Text>{`Distributed Amount: $${item.distributedAmount || 'N/A'}`}</Text>
-              <Text>{`$${item.parentRefferal || 'N/A'} will go to ${item.referredBy}`}</Text>
-            </View>
-          )}
-        />
-        <TouchableOpacity style={{backgroundColor:primary, paddingVertical:15, borderRadius:10, alignItems:'center' } } onPress={handleConfirm}>
-          <Text style={{color:'#fff', fontWeight:'500', fontSize:18}}>
-            Confirm
-          </Text>
-        </TouchableOpacity>
+          <FlatList
+            data={eligibleUsers}
+            keyExtractor={(item) => item.username}
+            renderItem={({ item }) => (
+              <View style={styles.userItem}>
+                <Text>{`Id: ${item.username || 'N/A'}`}</Text>
+                <Text>{`User: ${item.name || 'N/A'}`}</Text>
+                <Text>{`Plan Level: $${item.plan || 'N/A'}`}</Text>
+                <Text>{`Referred By: ${item.referredBy || 'None'}`}</Text>
+                <Text>{`Distributed Amount: $${item.distributedAmount || 'N/A'}`}</Text>
+                
+              </View>
+            )}
+          />
+          <TouchableOpacity style={{ backgroundColor: primary, paddingVertical: 15, borderRadius: 10, alignItems: 'center' }} onPress={handleConfirm}>
+            <Text style={{ color: '#fff', fontWeight: '500', fontSize: 18 }}>
+              Confirm
+            </Text>
+          </TouchableOpacity>
         </View>
       )}
 

@@ -13,7 +13,7 @@ const Dashboard = () => {
   return (
       <Tab.Navigator
       initialRouteName='Home'
-        tabBarOptions={{
+        screenOptions={{
           activeTintColor: primary, // Primary color for active tab
           inactiveTintColor: 'gray', // Default color for inactive tab
           style: {
@@ -26,6 +26,7 @@ const Dashboard = () => {
           name="Home"
           component={Home}
           options={{
+            tabBarActiveTintColor:primary,
             headerShown: false,
             tabBarIcon: ({ color, size }) => (
               <Ionicons name="home-outline" size={size} color={color} />
@@ -33,9 +34,10 @@ const Dashboard = () => {
           }}
         />
         <Tab.Screen
-          name="History"
+          name="Requests"
           component={Transactions}
           options={{
+            tabBarActiveTintColor:primary,
             headerShown: false,
             tabBarIcon: ({ color, size }) => (
               <Ionicons name="md-wallet" size={size} color={color} />
@@ -46,6 +48,7 @@ const Dashboard = () => {
           name="Account"
           component={Account}
           options={{
+            tabBarActiveTintColor:primary,
             headerShown: false,
             tabBarIcon: ({ color, size }) => (
               <Ionicons name="person" size={size} color={color} />

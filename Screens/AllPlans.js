@@ -1,153 +1,138 @@
-import { StyleSheet, Text, View, TouchableOpacity, Dimensions, SafeAreaView, ScrollView, Alert } from 'react-native'
-import React, { useState } from 'react'
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import React, { useState, useEffect } from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  Dimensions,
+  SafeAreaView,
+  ScrollView,
+  Alert,
+} from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { set, ref, getDatabase, update } from 'firebase/database';
-import auth from '../config';
+import { getDatabase, ref, onValue } from 'firebase/database';
 import { primary } from '../color';
+import auth from '../config';
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
 const All_plans = ({ navigation, route }) => {
-  const { balance } = route.params
-  const handlePlanSelect = (plan, inRate) => {
-    navigation.navigate('PlanSelection', { selectedPlan: plan, balance: balance, interest: inRate })
+  const { balance, userPlan } = route.params;
+  const db = getDatabase();
+  const [plans, setPlans] = useState([]); // State to store plans fetched from Firebase
+
+  useEffect(() => {
+    const db = getDatabase();
+    // Fetch plans from Firebase when the component mounts
+    const plansRef = ref(db, 'plans');
+    onValue(plansRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        const planList = Object.keys(data).map((key) => ({
+          id: key,
+          ...data[key],
+        }));
+        setPlans(planList);
+      }
+    });
+  }, []);
+
+  const user = auth.currentUser;
+  const [isEmailVerified, setIsEmailVerified] = useState(user?.emailVerified || false);
+  const [isDocumentVerified, setIsDocumentVerified] = useState(false);
+  useEffect(() => {
+    // Listen for changes in email verification status
+    const unsubscribe = auth.onAuthStateChanged((updatedUser) => {
+      if (updatedUser) {
+        setIsEmailVerified(updatedUser.emailVerified);
+      }
+    });
+
+    // Get the document verification status
+    const getVerificationStatus = () => {
+      const userRef = ref(db, `Documents/${auth.currentUser.displayName}`);
+      onValue(userRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          const verificationStatus = data.verified;
+          setIsDocumentVerified(verificationStatus === true);
+
+        } else {
+          setIsDocumentVerified(false);
+        }
+      });
+    };
+
+    //Get the percentage 
+
+    getVerificationStatus();  
+    return () => unsubscribe();
+  }, []);
+
+  const handlePlanSelect = (planAmount, interestRate, planLevel) => {
+    if (isEmailVerified === false) {
+      Alert.alert('Please Complete Email Verification In order to invest in Nova Trust')
+      return
+    }
+    else if (isDocumentVerified === false) {
+      Alert.alert('Please Complete Document Verification In order to invest in Nova Trust')
+      return
+    }
+    else if(userPlan === 0 ||userPlan === '0'){
+      navigation.navigate('Deposit', {planAmount, planLevel})
+    }
+    else{
+    navigation.navigate('PlanSelection', {
+      selectedPlan: planAmount,
+      balance: balance,
+      interest: interestRate,
+      userPlan: userPlan,
+      planLevel:planLevel
+    });
+  }
   };
 
   return (
     <ScrollView>
       <SafeAreaView style={styles.container}>
-
         <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10, marginTop: 35, marginBottom: 20 }}>
           <AntDesign name='left' size={24} onPress={() => navigation.goBack()} />
           <Text style={styles.head}>Investment Plans</Text>
         </View>
 
-
-        <TouchableOpacity style={styles.btnContainer} onPress={() => handlePlanSelect(200, 0.5)}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-            <Text style={{ fontSize: 18, fontWeight: '500' }}>Plan 1</Text>
-            <AntDesign name='right' size={24} />
-          </View>
-          <View style={{flexDirection:'row', justifyContent:'space-between', marginTop:5}}>
-            <Text style={[styles.btnTxt, { fontWeight: '300', fontSize: 16 }]}>Investment</Text>
-            <Text style={[styles.btnTxt, { fontWeight: '300', fontSize: 16 }]}>Returns upto</Text>
-          </View>
-          <View style={{flexDirection:'row', justifyContent:'space-between'}}>
-          <Text style={styles.btnTxt}>$ 200</Text>
-          <Text style={[styles.btnTxt, {color:primary}]}>$ 1000</Text>
-          </View> 
-        </TouchableOpacity>
-
-
-        <TouchableOpacity style={styles.btnContainer} onPress={() => handlePlanSelect(400, 1)}>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-            <Text style={{ fontSize: 18, fontWeight: '500' }}>Plan 2</Text>
-            <AntDesign name='right' size={24} />
-          </View>
-          <View style={{flexDirection:'row', justifyContent:'space-between', marginTop:5}}>
-            <Text style={[styles.btnTxt, { fontWeight: '300', fontSize: 16 }]}>Investment</Text>
-            <Text style={[styles.btnTxt, { fontWeight: '300', fontSize: 16 }]}>Returns upto</Text>
-          </View>
-          <View style={{flexDirection:'row', justifyContent:'space-between'}}>
-          <Text style={styles.btnTxt}>$ 400</Text>
-          <Text style={[styles.btnTxt, {color:primary}]}>$ 2000</Text>
-          </View> 
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.btnContainer} onPress={() => handlePlanSelect(600, 1.5)}>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-            <Text style={{ fontSize: 18, fontWeight: '500' }}>Plan 3</Text>
-            <AntDesign name='right' size={24} />
-          </View>
-          <View style={{flexDirection:'row', justifyContent:'space-between', marginTop:5}}>
-            <Text style={[styles.btnTxt, { fontWeight: '300', fontSize: 16 }]}>Investment</Text>
-            <Text style={[styles.btnTxt, { fontWeight: '300', fontSize: 16 }]}>Returns upto</Text>
-          </View>
-          <View style={{flexDirection:'row', justifyContent:'space-between'}}>
-          <Text style={styles.btnTxt}>$ 600</Text>
-          <Text style={[styles.btnTxt, {color:primary}]}>$ 3000</Text>
-          </View> 
-        </TouchableOpacity>
-
-        <TouchableOpacity style={[styles.btnContainer,]} onPress={() => handlePlanSelect(800, 3)}>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-            <Text style={{ fontSize: 18, fontWeight: '500' }}>Plan 4</Text>
-            <AntDesign name='right' size={24} />
-          </View>
-          <View style={{flexDirection:'row', justifyContent:'space-between', marginTop:5}}>
-            <Text style={[styles.btnTxt, { fontWeight: '300', fontSize: 16 }]}>Investment</Text>
-            <Text style={[styles.btnTxt, { fontWeight: '300', fontSize: 16 }]}>Returns upto</Text>
-          </View>
-          <View style={{flexDirection:'row', justifyContent:'space-between'}}>
-          <Text style={styles.btnTxt}>$ 800</Text>
-          <Text style={[styles.btnTxt, {color:primary}]}>$ 4000</Text>
-          </View> 
-        </TouchableOpacity>
-
-        <TouchableOpacity style={[styles.btnContainer,]} onPress={() => handlePlanSelect(1000, 6)}>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-            <Text style={{ fontSize: 18, fontWeight: '500' }}>Plan 5</Text>
-            <AntDesign name='right' size={24} />
-          </View>
-          <View style={{flexDirection:'row', justifyContent:'space-between', marginTop:5}}>
-            <Text style={[styles.btnTxt, { fontWeight: '300', fontSize: 16 }]}>Investment</Text>
-            <Text style={[styles.btnTxt, { fontWeight: '300', fontSize: 16 }]}>Returns upto</Text>
-          </View>
-          <View style={{flexDirection:'row', justifyContent:'space-between'}}>
-          <Text style={styles.btnTxt}>$ 1000</Text>
-          <Text style={[styles.btnTxt, {color:primary}]}>$ 5000</Text>
-          </View> 
-        </TouchableOpacity>
-
-        <TouchableOpacity style={[styles.btnContainer,]} onPress={() => handlePlanSelect(1500, 8)}>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-            <Text style={{ fontSize: 18, fontWeight: '500' }}>Plan 6</Text>
-            <AntDesign name='right' size={24} />
-          </View>
-          <View style={{flexDirection:'row', justifyContent:'space-between', marginTop:5}}>
-            <Text style={[styles.btnTxt, { fontWeight: '300', fontSize: 16 }]}>Investment</Text>
-            <Text style={[styles.btnTxt, { fontWeight: '300', fontSize: 16 }]}>Returns upto</Text>
-          </View>
-          <View style={{flexDirection:'row', justifyContent:'space-between'}}>
-          <Text style={styles.btnTxt}>$ 1500</Text>
-          <Text style={[styles.btnTxt, {color:primary}]}>$ 7500</Text>
-          </View> 
-        </TouchableOpacity>
-
-        <TouchableOpacity style={[styles.btnContainer,]} onPress={() => handlePlanSelect(2000, 10)}>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-            <Text style={{ fontSize: 18, fontWeight: '500' }}>Plan 7</Text>
-            <AntDesign name='right' size={24} />
-          </View>
-          <View style={{flexDirection:'row', justifyContent:'space-between', marginTop:5}}>
-            <Text style={[styles.btnTxt, { fontWeight: '300', fontSize: 16 }]}>Investment</Text>
-            <Text style={[styles.btnTxt, { fontWeight: '300', fontSize: 16 }]}>Returns upto</Text>
-          </View>
-          <View style={{flexDirection:'row', justifyContent:'space-between'}}>
-          <Text style={styles.btnTxt}>$ 2000</Text>
-          <Text style={[styles.btnTxt, {color:primary}]}>$ 10000</Text>
-          </View> 
-        </TouchableOpacity>
-
+        {/* Map over the plans and render them dynamically */}
+        {plans.map((plan) => (
+          <TouchableOpacity style={styles.btnContainer} key={plan.id} onPress={() => handlePlanSelect(plan.amount, plan.interest, plan.level)}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+              <Text style={{ fontSize: 18, fontWeight: '500' }}>Level {plan.level}</Text>
+              <AntDesign name='right' size={24} />
+            </View>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 5 }}>
+              <Text style={[styles.btnTxt, { fontWeight: '300', fontSize: 16 }]}>Investment</Text>
+              <Text style={[styles.btnTxt, { fontWeight: '300', fontSize: 16 }]}>Returns upto</Text>
+            </View>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+              <Text style={styles.btnTxt}>$ {plan.amount}</Text>
+              <Text style={[styles.btnTxt, { color: primary }]}>$ {plan.potentialEarning}</Text>
+            </View>
+          </TouchableOpacity>
+        ))}
       </SafeAreaView>
     </ScrollView>
+  );
+};
 
-  )
-}
-
-export default All_plans
+export default All_plans;
 
 const styles = StyleSheet.create({
   container: {
     paddingVertical: 20,
-    paddingHorizontal: 10
+    paddingHorizontal: 10,
   },
   closeIcon: {
     alignSelf: 'flex-end',
-    marginRight: 10
+    marginRight: 10,
   },
   head: {
     alignSelf: 'center',
@@ -162,10 +147,10 @@ const styles = StyleSheet.create({
     marginHorizontal: windowWidth * 0.05,
     borderRadius: 10,
     padding: windowWidth * 0.05,
-    elevation: 1
+    elevation: 1,
   },
   btnTxt: {
     fontSize: 18,
-    fontWeight: '500'
-  }
-})
+    fontWeight: '500',
+  },
+});

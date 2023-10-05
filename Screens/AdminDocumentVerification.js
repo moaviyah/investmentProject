@@ -32,6 +32,7 @@ const AdminDocumentVerification = ({ navigation }) => {
     update(documentRef, {  verified: true })
       .then(() => {
         // Document verification successful
+        navigation.goBack()
         Alert.alert('Success', `Document for user ${username} verified.`);
       })
       .catch((error) => {
@@ -39,20 +40,31 @@ const AdminDocumentVerification = ({ navigation }) => {
         Alert.alert('Error', 'Failed to verify document. Please try again.');
       });
   };
-
-  const openImageViewer = (index) => {
-    setSelectedImageIndex(index);
+  const declineRequest = (username) => {
+    // Update the verification status of the user's document
+    const documentRef = ref(db, `Documents/${username}`);
+    update(documentRef, {  verified: 'declined' })
+      .then(() => {
+        // Document verification successful
+        Alert.alert('Success', `Document for user ${username} verified.`);
+        navigation.goBack()
+      })
+      .catch((error) => {
+        // Handle error
+        Alert.alert('Error', 'Failed to verify document. Please try again.');
+      });
   };
 
-  const closeImageViewer = () => {
-    setSelectedImageIndex(null);
-  };
 
   const renderItem = ({ item, index }) => (
     <View style={styles.userContainer}>
       <View style={{flexDirection:'row', justifyContent:'space-between', alignItems:'center'}}>
       <Text style={styles.username}>User: {item.username}</Text>
-      <Text style={[styles.username, {fontSize:16}]}>Status: {item.userData.verified ? 'Verified' : 'Not Verified'}</Text>
+      <Text style={[styles.username, {fontSize:16}]}>
+        Status: {
+        item.userData.verified === true ? 'Verified' : 'Not Verified'
+        }
+      </Text>
       </View>
       <Lightbox
         underlayColor="white"
@@ -91,6 +103,12 @@ const AdminDocumentVerification = ({ navigation }) => {
       {!item.userData.verified && (
         <TouchableOpacity onPress={() => verifyDocument(item.username)} style={styles.verifyButton}>
           <Text style={styles.verifyButtonText}>Verify Document</Text>
+        </TouchableOpacity>
+      )}
+
+{!item.userData.verified && (
+        <TouchableOpacity onPress={() => declineRequest(item.username)} style={[styles.verifyButton, {backgroundColor:'red', marginTop:5}]}>
+          <Text style={styles.verifyButtonText}>Decline Request</Text>
         </TouchableOpacity>
       )}
     </View>

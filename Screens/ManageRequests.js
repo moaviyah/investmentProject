@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, FlatList, Alert, Clipboard } from 'react-native';
-import { getDatabase, ref, onValue, update, get } from "firebase/database";
+import { getDatabase, ref, onValue, update, get, push } from "firebase/database";
 import { AntDesign, MaterialCommunityIcons } from 'react-native-vector-icons';
 import { background } from '../color';
-
 
 const ManageRequests = ({ navigation }) => {
   const [requests, setRequests] = useState([]);
   const db = getDatabase();
+  const [percentage, setPercentage] = useState(0)
   const copyToClipboardAndToggleIcon = (item) => {
     Clipboard.setString(item.trxId);
     item.isCopied = true; // Toggle the isCopied property for the clicked request item
@@ -30,6 +30,16 @@ const ManageRequests = ({ navigation }) => {
         setRequests(requestArray);
       }
     });
+    const getPercentage = ()=>{
+      const percentageRef = ref(db, `oneTimeRefferalPayment/percentage`)
+      onValue(percentageRef,(percentageSnapshot)=>{
+        const percent = percentageSnapshot.val();
+        if(percent){
+          setPercentage(percent)
+        }
+      })
+    }
+    getPercentage();
   }, []);
 
   const formatDate = (timestamp) => {
@@ -50,20 +60,46 @@ const ManageRequests = ({ navigation }) => {
     return `${formattedHours}:${formattedMinutes} ${ampm}`;
   };
 
-  const handleCompleteRequest = (requestId, username, amount, request) => {
+  const handleCompleteRequest = (requestId, username, amount, request, level, referredBy) => {
     const userBalanceRef = ref(db, `users/${username}`);
     const requestRef = ref(db, `requests/${requestId}`);
+    const referralRef = ref(db, `users/${referredBy}/referrals/${username}`);
+    
+
+    // Push the distribution entry to the user's history
+    
+    
     // Get the current user's balance from the database
     if(request === 'Deposit'){
+      const referralBonus = (parseFloat(amount) * (percentage/100)).toFixed(2);
       get(userBalanceRef)
       .then((snapshot) => {
         if (snapshot.exists()) {
-          const currentBalance = parseFloat(snapshot.val().balance) ;
-          console.log('current balance',typeof parseFloat(currentBalance) , 'amount', typeof parseFloat(amount) )
-          const newBalance = currentBalance + parseFloat(amount);
-          console.log('new balance', newBalance)
-          // Update the user's balance in the database
-          update(userBalanceRef, {balance: newBalance})
+          update(referralRef, {approved:true}).then(()=>{
+            if(snapshot.val().firstRefferalPayment === false){
+              const oneTimePaymentref = ref(db, `users/${referredBy}`)
+              const userHistoryRef = ref(db, `users/${referredBy}/history`);
+              get(oneTimePaymentref).then((refferalSnapshot)=>{
+                if(refferalSnapshot.exists()){
+                  const refferalCurrentBalance = parseFloat(refferalSnapshot.val().balance)
+                  const newRefferalCurrentBalance = refferalCurrentBalance + parseFloat(referralBonus)
+                  const refferalEarnedByRefferals = parseFloat(refferalSnapshot.val().refferalEarning)
+                  const newRefferalEarnedByRefferals = refferalEarnedByRefferals + parseFloat(referralBonus)
+                  const distributionEntry = {
+                    amount: referralBonus,
+                    Type:'Refferal Bonus',
+                    date: new Date().toLocaleDateString(), // Format the date as desired
+                    time: new Date().toLocaleTimeString(), // Format the time as desired
+                  };
+                  update(oneTimePaymentref, {balance:newRefferalCurrentBalance, refferalEarning: newRefferalEarnedByRefferals}).then(()=>{
+                  push(userHistoryRef, distributionEntry);
+                  })
+                  
+                }
+              })
+            }
+          })
+          update(userBalanceRef, {plan: parseFloat(amount), level:parseFloat(level), firstRefferalPayment:true})
           update(requestRef, { status: 'Completed' })
             .then(() => {
               // Successfully updated
@@ -83,7 +119,8 @@ const ManageRequests = ({ navigation }) => {
         Alert.alert('Error', 'Unable')
         console.log(error.message)
       })
-    }else{
+    }
+    else{
       get(userBalanceRef)
       .then((snapshot) => {
         if (snapshot.exists()) {
@@ -113,9 +150,9 @@ const ManageRequests = ({ navigation }) => {
         console.log(error.message)
       })
     }
-
     }
     
+
   const handleRejectRequest = (requestId) => {
     // Update the request status to "Rejected" in the database
     const requestRef = ref(db, `requests/${requestId}`);
@@ -178,6 +215,23 @@ const ManageRequests = ({ navigation }) => {
                 </View>
               )
             }
+           {
+  item.userWallet && (
+    <View style={[styles.entry, {paddingHorizontal:5}]}>
+      <MaterialCommunityIcons name="key" size={24} color="#333" />
+      <Text style={[styles.entryTitle, { color: '#333' }]}>User Wallet:</Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flex: 1 }}>
+        <Text style={[styles.entryValue, { color: '#444',  }]}>{item.userWallet} </Text>
+        <MaterialCommunityIcons
+          name={item.isCopied ? 'check' : 'content-copy'}
+          size={20}
+          onPress={() => copyToClipboardAndToggleIcon(item)}
+        />
+      </View>
+    </View>
+  )
+}
+
             <View style={styles.entry}>
               <MaterialCommunityIcons name="calendar" size={24} color="#333" />
               <Text style={[styles.entryTitle, { color: '#333' }]}>Status:</Text>
@@ -198,7 +252,7 @@ const ManageRequests = ({ navigation }) => {
               <View style={styles.buttonsContainer}>
                 <TouchableOpacity
                   style={[styles.button, styles.completeButton]}
-                  onPress={() => handleCompleteRequest(item.requestId, item.username, item.amount, item.request)}
+                  onPress={() => handleCompleteRequest(item.requestId, item.username, item.amount, item.request, item.level && item.level, item.referredBy)}
                 >
                   <Text style={styles.buttonText}>Complete</Text>
                 </TouchableOpacity>

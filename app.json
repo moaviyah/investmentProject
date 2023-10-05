@@ -4,7 +4,7 @@
     "slug": "InvestmentApp",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/TrustNOVALogo.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/TrustNOVALogo.png",
@@ -21,10 +21,16 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/TrustNOVALogo.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.moaviya.InvestmentApp"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "89c0dd98-4471-433e-82a9-8bd57cbab3c4"
+      }
     }
   }
 }
