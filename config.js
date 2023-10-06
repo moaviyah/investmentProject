@@ -3,13 +3,13 @@ import { initializeApp } from "firebase/app";
 import {getAuth} from 'firebase/auth'
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCh5FYc5FeSmKufAIV5mOqr9MtLXmHiWnY",
-  authDomain: "whale-profits.firebaseapp.com",
-  projectId: "whale-profits",
-  storageBucket: "whale-profits.appspot.com",
-  messagingSenderId: "494584726928",
-  appId: "1:494584726928:web:5caa5387a8820d0a48df15",
-  measurementId: "G-V31G2EH7RS"
+  apiKey: "AIzaSyBD_T3-Som1x4ngiBCOVa3HXtTgkwF6C94",
+  authDomain: "nova-trust-cbfd9.firebaseapp.com",
+  databaseURL: "https://nova-trust-cbfd9-default-rtdb.firebaseio.com",
+  projectId: "nova-trust-cbfd9",
+  storageBucket: "nova-trust-cbfd9.appspot.com",
+  messagingSenderId: "1068504317514",
+  appId: "1:1068504317514:web:b1cadb78b30c34ecc370b3"
 };
 
 // Initialize Firebase
